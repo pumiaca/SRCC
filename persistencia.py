@@ -1,9 +1,9 @@
 # Guardado y carga de datos en JSON
+import json, os
 
-async def cargar_productos(id_producto, nombre, descripción, precio):
+def cargar_productos(id_producto: int, nombre: str, descripcion: str, precio: float):
     '''
     Cargar productos en archivo json
-    tipo: async def
     Parámetros:
     - id_producto: ID del producto
     - nombre: Nombre del producto
@@ -12,11 +12,20 @@ async def cargar_productos(id_producto, nombre, descripción, precio):
     Return:
     - Confirmación
     '''
+    try:
+        file_location = os.path.dirname(__file__)
+        file_path = file_location + "\src\database.json"
 
-async def cargar_ventas(id_venta, id_cliente, id_producto, cantidad, precio):
+        with open(file_path, 'r', encoding='utf-8') as file:
+            print(file)
+
+    except Exception as e:
+        print("Error al leer el archivo", e)
+
+
+def cargar_ventas(id_venta, id_cliente, id_producto, cantidad, precio):
     '''
     Cargar ventas en archivo json
-    tipo: async def
     Parámetros:
     - id_venta: ID de la venta
     - id_cliente: ID del cliente
@@ -27,7 +36,7 @@ async def cargar_ventas(id_venta, id_cliente, id_producto, cantidad, precio):
     - Confirmación
     '''
 
-async def cargar_compras(id_compra, id_proveedor, id_producto, cantidad, precio):
+def cargar_compras(id_compra, id_proveedor, id_producto, cantidad, precio):
     '''
     Cargar compras en archivo json
     tipo: async def
@@ -41,7 +50,7 @@ async def cargar_compras(id_compra, id_proveedor, id_producto, cantidad, precio)
     - Confirmación
     '''
 
-async def cargar_proveedor(id_proveedor, nombre, contacto):
+def cargar_proveedor(id_proveedor, nombre, contacto):
     '''
     Cargar proveedores en archivo json
     tipo: async def
@@ -53,7 +62,7 @@ async def cargar_proveedor(id_proveedor, nombre, contacto):
     - Confirmación
     '''
 
-async def cargar_clientes(id_cliente, nombre, email, telefono):
+def cargar_clientes(id_cliente, nombre, email, telefono):
     '''
     Cargar clientes en archivo json
     tipo: async def
@@ -66,7 +75,7 @@ async def cargar_clientes(id_cliente, nombre, email, telefono):
     - Confirmación
     '''
 
-async def eliminar_elemento(lista, id_elemento):
+def eliminar_elemento(lista, id_elemento):
     '''
     Eliminar un elemento de una lista
     tipo: async def
@@ -76,3 +85,5 @@ async def eliminar_elemento(lista, id_elemento):
     Return:
     - Confirmación
     '''
+
+cargar_productos(2, "Maria", "Mate y Bombilla", 99.99)
