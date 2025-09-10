@@ -1,89 +1,84 @@
-# Guardado y carga de datos en JSON
-import json, os
+import json
 
-def cargar_productos(id_producto: int, nombre: str, descripcion: str, precio: float):
-    '''
-    Cargar productos en archivo json
-    Parámetros:
-    - id_producto: ID del producto
-    - nombre: Nombre del producto
-    - descripción: Descripción del producto
-    - precio: Precio del producto
-    Return:
-    - Confirmación
-    '''
+def leer(archivo:str):
+    """
+    Leer datos de un archivo JSON.
+    Atributos:
+    - archivo: nombre del archivo sin extensión .json
+    Retorna:
+        Si el archivo existe, devuelve una lista de diccionarios con los datos del archivo.
+        Si el archivo no existe, devuelve una lista vacía.
+    """
+    datos = []
     try:
-        file_location = os.path.dirname(__file__)
-        file_path = file_location + "\src\database.json"
+        with open(f"./src/{archivo}.json", "r", encoding="utf-8") as archivo:
+            datos = json.load(archivo)
+        return datos
+    except FileNotFoundError:
+        return []
 
-        with open(file_path, 'r', encoding='utf-8') as file:
-            print(file)
-
+def cargar(archivo:str, dato:dict):
+    """
+    Cargar 1 registro de un archivo JSON.
+    Atributos:
+        - archivo: nombre del archivo sin extensión .json
+        - dato: diccionario con el registro a cargar
+    Retorna:
+        Si el archivo existe, devuelve una lista de diccionarios con los datos del archivo.
+        Si el archivo no existe, devuelve el error.
+    """
+    datos = leer(archivo)
+    datos.append(dato)
+    try:
+        with open(f"./src/{archivo}.json", "w", encoding="utf-8") as archivo:
+            json.dump(datos, archivo)
+        print(datos)
+        return datos
     except Exception as e:
-        print("Error al leer el archivo", e)
+        print(f"Error de Carga: {e}")
+        return f"Error de Carga: {e}"
 
+"""
+def actualizar(archivo:str, dato:dict): no funca, aún.
+    
+    Actualizar 1 registro de un archivo JSON.
+    Atributos:
+        - archivo: nombre del archivo sin extensión .json
+        - dato: diccionario con el registro a actualizar
+    Retorna:
+        Si el archivo existe, devuelve una lista de diccionarios con los datos del archivo.
+        Si el archivo no existe, devuelve el error.
+    
+    datos = leer(archivo)
+    for i, item in datos:
+        if item["id"] == dato["id"]:
+            datos[i] = dato
+    try:
+        with open(f"./src/{archivo}.json", "w", encoding="utf-8") as archivo:
+            json.dump(datos, archivo)
+        return datos
+    except Exception as e:
+        return f"Error de Carga: {e}"
 
-def cargar_ventas(id_venta, id_cliente, id_producto, cantidad, precio):
-    '''
-    Cargar ventas en archivo json
-    Parámetros:
-    - id_venta: ID de la venta
-    - id_cliente: ID del cliente
-    - id_producto: ID del producto
-    - cantidad: Cantidad vendida
-    - precio: Precio de venta
-    Return:
-    - Confirmación
-    '''
+actualizar("productos", {'id': 1, 'nombre': 'Producto 1000', 'precio': 100})
 
-def cargar_compras(id_compra, id_proveedor, id_producto, cantidad, precio):
-    '''
-    Cargar compras en archivo json
-    tipo: async def
-    Parámetros:
-    - id_compra: ID de la compra
-    - id_proveedor: ID del proveedor
-    - id_producto: ID del producto
-    - cantidad: Cantidad comprada
-    - precio: Precio de compra
-    Return:
-    - Confirmación
-    '''
+"""
 
-def cargar_proveedor(id_proveedor, nombre, contacto):
-    '''
-    Cargar proveedores en archivo json
-    tipo: async def
-    Parámetros:
-    - id_proveedor: ID del proveedor
-    - nombre: Nombre del proveedor
-    - contacto: Información de contacto del proveedor
-    Return:
-    - Confirmación
-    '''
-
-def cargar_clientes(id_cliente, nombre, email, telefono):
-    '''
-    Cargar clientes en archivo json
-    tipo: async def
-    Parámetros:
-    - id_cliente: ID del cliente
-    - nombre: Nombre del cliente
-    - email: Email del cliente
-    - telefono: Teléfono del cliente
-    Return:
-    - Confirmación
-    '''
-
-def eliminar_elemento(lista, id_elemento):
-    '''
-    Eliminar un elemento de una lista
-    tipo: async def
-    Parámetros:
-    - lista: La lista de la que se eliminará el elemento (proveedores, clientes, productos, ventas, compras)
-    - id_elemento: El ID del elemento a eliminar
-    Return:
-    - Confirmación
-    '''
-
-cargar_productos(2, "Maria", "Mate y Bombilla", 99.99)
+def borrar(archivo:str, dato:dict):
+    """
+    Borrar 1 registro de un archivo JSON.
+    Atributos:
+        - archivo: nombre del archivo sin extensión .json
+        - dato: diccionario con el registro a borrar
+    Retorna:
+        Si el archivo existe, devuelve una lista de diccionarios con los datos del archivo.
+        Si el archivo no existe, devuelve el error.
+    """
+    datos = leer(archivo)
+    datos = [item for item in datos if item["id"] != dato["id"]]
+    try:
+        with open(f"./src/{archivo}.json", "w", encoding="utf-8") as archivo:
+            json.dump(datos, archivo)
+        return datos
+    except Exception as e:
+        return f"Error de Carga: {e}"
