@@ -38,9 +38,8 @@ def cargar(archivo:str, dato:dict):
         print(f"Error de Carga: {e}")
         return f"Error de Carga: {e}"
 
-"""
-def actualizar(archivo:str, dato:dict): no funca, aún.
-    
+def actualizar(archivo:str, dato:dict):
+    """
     Actualizar 1 registro de un archivo JSON.
     Atributos:
         - archivo: nombre del archivo sin extensión .json
@@ -49,20 +48,21 @@ def actualizar(archivo:str, dato:dict): no funca, aún.
         Si el archivo existe, devuelve una lista de diccionarios con los datos del archivo.
         Si el archivo no existe, devuelve el error.
     
+    """
     datos = leer(archivo)
-    for i, item in datos:
-        if item["id"] == dato["id"]:
-            datos[i] = dato
+    nuevos_datos = []
+    for item in datos:
+        if(item["id"] != dato["id"]):
+            nuevos_datos.append(item)
+        else:
+            nuevos_datos.append(dato)
+    
     try:
         with open(f"./src/{archivo}.json", "w", encoding="utf-8") as archivo:
-            json.dump(datos, archivo)
-        return datos
+            json.dump(nuevos_datos, archivo)
+        return nuevos_datos
     except Exception as e:
         return f"Error de Carga: {e}"
-
-actualizar("productos", {'id': 1, 'nombre': 'Producto 1000', 'precio': 100})
-
-"""
 
 def borrar(archivo:str, dato:dict):
     """
@@ -82,3 +82,4 @@ def borrar(archivo:str, dato:dict):
         return datos
     except Exception as e:
         return f"Error de Carga: {e}"
+
