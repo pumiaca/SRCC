@@ -1,6 +1,6 @@
 # Cálculo de ingresos, egresos y balance
 
-def calcularIngresos(ventas, fechaInicio, fechaFin):
+def calcularIngresos(ventas, desdeFecha, hastaFecha):
     """
     Calcula el total de ingresos en un período dado.
 
@@ -14,7 +14,19 @@ def calcularIngresos(ventas, fechaInicio, fechaFin):
             - total_ingresos
             - detalle
     """
-    pass
+    detalle = ventas[desdeFecha:hastaFecha]
+
+    if not detalle:
+        return print("No existen registros en ese periodo.")
+
+    totalIngresos = 0
+    for venta in detalle:
+        totalIngresos += venta['total']
+
+    fechaInicio = detalle[0]['fecha']
+
+    return (fechaInicio, totalIngresos)
+
 
 
 def calcularEgresos(compras, pagosProveedores, fechaInicio, fechaFin):
