@@ -5,7 +5,7 @@ def calcularIngresos(ventas, desdeFecha, hastaFecha):
     Calcula el total de ingresos en un período dado.
 
     Parámetros:
-        ventas (list[dict(?)]): Lista de ventas, cada una con al menos 'fecha' y 'total'.
+        ventas (dict): Lista de ventas, cada una con al menos 'fecha' y 'total'.
         desde (str): Fecha inicial en formato 'YYYY-MM-DD'.
         hasta (str): Fecha final en formato 'YYYY-MM-DD'.
 
