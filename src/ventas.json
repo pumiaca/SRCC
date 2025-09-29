@@ -1,0 +1,58 @@
+[
+    {
+        "id": "1",
+        "nombre": "Cafe 500gm",
+        "precio": 434.0,
+        "cantidad": 10,
+        "total": 4340.0
+    },
+    {
+        "id": "2",
+        "nombre": "T\u00e9",
+        "precio": 34.0,
+        "cantidad": 10,
+        "total": 340.0
+    },
+    {
+        "id": "3",
+        "nombre": "Leche 2%",
+        "precio": 44.0,
+        "cantidad": 10,
+        "total": 440.0
+    },
+    {
+        "id": "4",
+        "nombre": "Azucar",
+        "precio": 40.0,
+        "cantidad": 10,
+        "total": 400.0
+    },
+    {
+        "id": "5",
+        "nombre": "Agua mineral",
+        "precio": 60.0,
+        "cantidad": 10,
+        "total": 600.0
+    },
+    {
+        "id": "6",
+        "nombre": "Pan de pancho",
+        "precio": 4.0,
+        "cantidad": 10,
+        "total": 40.0
+    },
+    {
+        "id": "6",
+        "nombre": "Pan de pancho",
+        "precio": 4.0,
+        "cantidad": 10,
+        "total": 40.0
+    },
+    {
+        "id": "6",
+        "nombre": "Pan de pancho",
+        "precio": 4.0,
+        "cantidad": 10,
+        "total": 40.0
+    }
+]
