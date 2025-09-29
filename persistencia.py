@@ -83,3 +83,18 @@ def borrar(archivo:str, dato:dict):
     except Exception as e:
         return f"Error de Carga: {e}"
 
+def buscar(archivo:str, dato:dict):
+    """
+    Buscar 1 registro de un archivo JSON.
+    Atributos:
+        - archivo: nombre del archivo sin extensión .json
+        - dato: diccionario con el registro a buscar
+    Retorna:
+        Si el archivo existe, devuelve el primer diccionario que coincida con el id del dato buscado.
+        Si el archivo no existe, devuelve el error.
+    """
+    datos = leer(archivo)
+    registro = list(filter(lambda x: x["id"] == dato["id"], datos))
+    print(registro)
+
+buscar("productos", {"id":'9820'})

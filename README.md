@@ -25,6 +25,7 @@ SRCC/
 │── stock.py             # Control de stock
 │── finanzas.py          # Cálculo de ingresos y egresos
 │── persistencia.py      # Guardado y carga de datos (JSON)
+|── testing.py           # Testing unitarios
 │── README.md            # Documentación del proyecto
 │── .gitignore           # Archivos a ignorar en Git
 ```
