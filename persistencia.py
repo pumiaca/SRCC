@@ -83,7 +83,7 @@ def borrar(archivo:str, dato:dict):
     except Exception as e:
         return f"Error de Carga: {e}"
 
-def buscar(archivo:str, dato:dict):
+def buscar_id(archivo:str, dato:dict):
     """
     Buscar 1 registro de un archivo JSON.
     Atributos:
@@ -96,5 +96,7 @@ def buscar(archivo:str, dato:dict):
     datos = leer(archivo)
     registro = list(filter(lambda x: x["id"] == dato["id"], datos))
     print(registro)
+    return registro
 
-buscar("productos", {"id":'9820'})
+
+buscar_id("productos", {"id":'9820'})
