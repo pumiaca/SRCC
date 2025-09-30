@@ -32,10 +32,8 @@ def cargar(archivo:str, dato:dict):
     try:
         with open(f"./src/{archivo}.json", "w", encoding="utf-8") as archivo:
             json.dump(datos, archivo)
-        print(datos)
         return datos
     except Exception as e:
-        print(f"Error de Carga: {e}")
         return f"Error de Carga: {e}"
 
 def actualizar(archivo:str, dato:dict):
@@ -95,7 +93,6 @@ def buscar_id(archivo:str, dato:dict):
     """
     datos = leer(archivo)
     registro = list(filter(lambda x: x["id"] == dato["id"], datos))
-    print(registro)
     return registro
 
 
