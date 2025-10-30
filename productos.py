@@ -26,6 +26,7 @@ def menu_productos():
         if opcion_p == "1":
             p = crear_producto()
             if agregar_producto(p):
+                cargar('productos', p)
                 print("Producto agregado.")
         elif opcion_p == "2":
             codigo = input("Ingrese Código del Producto: ").strip()

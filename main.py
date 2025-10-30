@@ -1,7 +1,12 @@
 from productos import menu_productos, listar_producto_buscado, crear_producto, agregar_producto, listar_productos, productos, obtener_producto_por_codigo
 from stock import menu_stock, verificar_stock, actualizar_stock
 
+
 def menu():
+    '''
+    Menú principal del sistema de control comercial.
+    Permite acceder a la gestión de productos, stock, ventas, compras, entre otros.
+    '''
     while True:
         print("\n=== SISTEMA DE CONTROL COMERCIAL ===")
         print("1. Productos")
