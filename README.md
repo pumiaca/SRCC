@@ -1,12 +1,12 @@
-#Proyecto Comercial - Algoritmos y Estructuras de Datos I
+# Proyecto Comercial - Algoritmos y Estructuras de Datos I
 
-##Descripción
+## Descripción
 Este proyecto implementa un **sistema de registro y control comercial en Python**, desarrollado como trabajo práctico para la materia **Algoritmos y Estructuras de Datos I**.  
 Permite gestionar productos, ventas y compras, calcular ingresos/egresos y mantener persistencia de datos en **JSON**.
 
 ---
 
-##Objetivos
+## Objetivos
 - Registrar productos.
 - Registrar ventas y compras.
 - Controlar y actualizar stock.
@@ -16,7 +16,7 @@ Permite gestionar productos, ventas y compras, calcular ingresos/egresos y mante
 
 ---
 
-##Estructura del proyecto
+## Estructura del proyecto
 ```
 SRCC/
 │── main.py              # Punto de entrada
@@ -25,13 +25,14 @@ SRCC/
 │── stock.py             # Control de stock
 │── finanzas.py          # Cálculo de ingresos y egresos
 │── persistencia.py      # Guardado y carga de datos (JSON)
+|── testing.py           # Testing unitarios
 │── README.md            # Documentación del proyecto
 │── .gitignore           # Archivos a ignorar en Git
 ```
 
 ---
 
-##Ejecución
+## Ejecución
 Para ejecutar el sistema, simplemente correr en consola:
 
 ```bash
@@ -49,7 +50,7 @@ Se abrirá un menú interactivo con las siguientes opciones:
 
 ---
 
-##Persistencia
+## Persistencia
 El sistema guarda los datos en archivos JSON:
 - `productos.json`
 - `ventas.json`
@@ -59,7 +60,7 @@ De esta forma, la información se mantiene disponible entre ejecuciones.
 
 ---
 
-##Tecnologías utilizadas
+## Tecnologías utilizadas
 - Lenguaje: **Python 3**
 - Paradigmas: programación estructurada y modular
 - Estructuras de datos: listas, diccionarios, tuplas, conjuntos
@@ -69,7 +70,7 @@ De esta forma, la información se mantiene disponible entre ejecuciones.
 
 ---
 
-##Cronograma de entregas
+## Cronograma de entregas
 - **Fase 1:** Definición de estructura JSON (10%)  
 - **Fase 2:** Registro de productos y transacciones (20%)  
 - **Fase 3:** Verificación de stock (40%)  
@@ -79,7 +80,7 @@ De esta forma, la información se mantiene disponible entre ejecuciones.
 
 ---
 
-##Autores
+## Autores
 **Alexis José Salazar Pumiaca** 
 **Guillermo Nicolas Rodriguez** 
 **Lucas Jorge Garcia** 

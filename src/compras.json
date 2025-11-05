@@ -1,0 +1,44 @@
+[
+    {
+        "id": "1",
+        "nombre": "Cafe 500gm",
+        "costo_unitario": 234.0,
+        "cantidad": 100,
+        "total": 23400.0
+    },
+    {
+        "id": "2",
+        "nombre": "T\u00e9",
+        "costo_unitario": 24.0,
+        "cantidad": 100,
+        "total": 2400.0
+    },
+    {
+        "id": "3",
+        "nombre": "Leche 2%",
+        "costo_unitario": 34.0,
+        "cantidad": 100,
+        "total": 3400.0
+    },
+    {
+        "id": "4",
+        "nombre": "Azucar",
+        "costo_unitario": 34.0,
+        "cantidad": 100,
+        "total": 3400.0
+    },
+    {
+        "id": "5",
+        "nombre": "Agua mineral",
+        "costo_unitario": 56.0,
+        "cantidad": 100,
+        "total": 5600.0
+    },
+    {
+        "id": "6",
+        "nombre": "Pan de pancho",
+        "costo_unitario": 4.0,
+        "cantidad": 100,
+        "total": 400.0
+    }
+]
