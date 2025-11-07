@@ -190,8 +190,8 @@ def calcularROI(desdeFecha, hastaFecha):
         ]
         comprasPeriodo = [
             c for c in compras
-            if datetime.strptime(v["fecha"], "%Y-%m-%d") >= fechaDesde
-            and datetime.strptime(v["fecha"], "%Y-%m-%d") <= fechaHasta
+            if datetime.strptime(c["fecha"], "%Y-%m-%d") >= fechaDesde
+            and datetime.strptime(c["fecha"], "%Y-%m-%d") <= fechaHasta
         ]
 
         if not ventasPeriodo or not comprasPeriodo:
