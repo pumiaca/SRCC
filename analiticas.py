@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+import tabulate
 import persistencia as p
 
 def proyectarIngresos(desdeFecha):
@@ -36,8 +37,8 @@ def proyectarIngresos(desdeFecha):
         ventasPeriodo = [
             v for v in ventas
             if "fecha" in v and
-               datetime.strptime(v["fecha"], "%Y-%m-%d") >= fechaInicio and
-               datetime.strptime(v["fecha"], "%Y-%m-%d") <= fechaActual
+                datetime.strptime(v["fecha"], "%Y-%m-%d") >= fechaInicio and
+                datetime.strptime(v["fecha"], "%Y-%m-%d") <= fechaActual
         ]
 
         if not ventasPeriodo:
@@ -77,11 +78,7 @@ def proyectarIngresos(desdeFecha):
         print(f"Error inesperado: {e}")
         return None
 
-import re
-from tabulate import tabulate
-from persistencia import leer
-
-def mostrarTopVentas(desdeFecha: str, hastaFecha: str, top: int = 5):
+def mostrarTopVentas(desdeFecha, hastaFecha, top: int = 5):
     """
     Muestra los productos más vendidos en un período dado.
     
@@ -96,9 +93,13 @@ def mostrarTopVentas(desdeFecha: str, hastaFecha: str, top: int = 5):
         formatoFecha = r"^\d{4}-\d{2}-\d{2}$"
         if not re.match(formatoFecha, desdeFecha) or not re.match(formatoFecha, hastaFecha):
             raise ValueError("Formato de fecha inválido. Use 'YYYY-MM-DD'.")
+        
+        if desdeFecha > hastaFecha:
+            raise ValueError("La fecha 'desde' debe ser anterior o igual a la fecha 'hasta'.")
+
 
         # Leer JSON
-        ventas = leer("ventasFakeParaTest")
+        ventas = p.leer("ventasFakeParaTest")
 
         if not ventas:
             raise FileNotFoundError("No se encontraron registros de ventas.")
@@ -147,4 +148,84 @@ def mostrarTopVentas(desdeFecha: str, hastaFecha: str, top: int = 5):
     except Exception as e:
         print(f"Error inesperado: {e}")
 
-mostrarTopVentas("2025-10-10", "2025-11-05")
+def calcularROI(desdeFecha, hastaFecha):
+    """
+    Calcula el ROI: El ROI (Return on Investment) 
+    mide la rentabilidad de una inversión, es decir, cuánto se ganó o perdió respecto al costo total de inversión.
+
+    Parámetros:
+        desdeFecha: comienzo de la muestra
+        hastaFecha: fin de la muestra
+
+    Retorna:
+        float: ROI expresado en porcentaje (%).
+    """
+    try:
+        # Validación del formato de fecha
+        formatoFecha = r"^\d{4}-\d{2}-\d{2}$"
+        if not re.match(formatoFecha, desdeFecha) or not re.match(formatoFecha, hastaFecha):
+            raise ValueError("Formato de fecha inválido. Use 'YYYY-MM-DD'.")
+
+        # Conversión a datetime para comparar orden
+        fechaDesde = datetime.strptime(desdeFecha, "%Y-%m-%d")
+        fechaHasta = datetime.strptime(hastaFecha, "%Y-%m-%d")
+
+        if fechaDesde > fechaHasta:
+            raise ValueError("La fecha 'desde' debe ser anterior o igual a la fecha 'hasta'.")
+
+        # Leer archivos de persistencia
+        ventas = p.leer("ventasFakesParaTest")
+        compras = p.leer("comprasFakesParaTest")
+
+        if not ventas:
+            raise FileNotFoundError("No se encontraron registros de ventas.")
+        if not compras:
+            raise FileNotFoundError("No se encontraron registros de compras.")
+
+        # Recorrer los items de los json por fecha <=
+        ventasPeriodo = [
+            v for v in ventas
+            if datetime.strptime(v["fecha"], "%Y-%m-%d") >= fechaDesde
+            and datetime.strptime(v["fecha"], "%Y-%m-%d") <= fechaHasta
+        ]
+        comprasPeriodo = [
+            c for c in compras
+            if datetime.strptime(v["fecha"], "%Y-%m-%d") >= fechaDesde
+            and datetime.strptime(v["fecha"], "%Y-%m-%d") <= fechaHasta
+        ]
+
+        if not ventasPeriodo or not comprasPeriodo:
+            print("No hay suficientes datos en el período seleccionado.")
+            return None
+
+        # Calcular ingresos y egresos totales y el famoso dividir por cero
+        totalIngresos = sum([v["total"] for v in ventasPeriodo])
+        totalEgresos = sum([c["total"] for c in comprasPeriodo])
+
+        if totalEgresos == 0:
+            raise ZeroDivisionError("Los egresos son cero, no se puede calcular ROI.")
+
+        # Calcular ROI en una lambda ;)
+        calcularROI = lambda ingresos, egresos: ((ingresos - egresos) / egresos) * 100
+        roi = calcularROI(totalIngresos, totalEgresos)
+
+        # Mostrar resultados
+        print(f"ANÁLISIS DE RENTABILIDAD (ROI)")
+        print(f"Período: {desdeFecha} → {hastaFecha}")
+        print(f"Ingresos Totales: ${totalIngresos:,.2f}")
+        print(f"Egresos Totales:  ${totalEgresos:,.2f}")
+        print(f"ROI: {roi:.2f}%")
+
+        return roi
+
+    except FileNotFoundError as e:
+        print(f"Error de archivo: {e}")
+    except ValueError as e:
+        print(f"Error de validación: {e}")
+    except ZeroDivisionError as e:
+        print(f"Error matemático: {e}")
+    except Exception as e:
+        print(f"Error inesperado: {e}")
+
+
+calcularROI("2025-10-25", "2025-11-05")
