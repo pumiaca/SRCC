@@ -1,33 +1,22 @@
-# compras.py
 from datetime import datetime
-import json, os
 from productos import productos, obtener_producto_por_codigo
 from stock import actualizar_stock
+from persistencia import leer, cargar, actualizar
 
 compras = []
 
-#  crear producto nuevo en JSON y en memoria 
-def _agregar_producto_nuevo(producto_dict, ruta="productos.json"):
-    # guardar en JSON 
-    data = []
-    if os.path.exists(ruta):
-        with open(ruta, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    data.append(producto_dict)
-    with open(ruta, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-
-    # reflejar en la lista 'productos' en memoria (si está)
-    productos.append(producto_dict)
-
 def registrar_compra():
-    """Carga una compra por consola. Crea el producto si no existe y actualiza stock (+)."""
-    producto_id = input("Código de producto: ").strip()
-    prod = obtener_producto_por_codigo(producto_id)
+    """Pide datos por consola. Si el producto no existe, lo crea."""
+    productos_archivo = leer("productos") 
 
-    # si no existe, ofrecer crearlo para poder comprar
-    if prod is None:
-        print("El producto no existe. Vamos a crearlo para poder comprarlo.")
+    producto_id = input("Código de producto: ").strip()
+
+    
+    prod_memoria = obtener_producto_por_codigo(producto_id)
+    prod_archivo = next((p for p in productos_archivo if str(p.get("id")) == str(producto_id)), None)
+
+    if (prod_memoria is None) and (prod_archivo is None):
+        print("El producto no existe. Crealo.")
         nombre = input("Nombre del producto: ").strip()
         precio_txt = input("Precio de venta (vacío = 0): ").strip()
         try:
@@ -35,15 +24,19 @@ def registrar_compra():
         except:
             print("Precio inválido. Se usará 0.")
             precio = 0.0
-        prod = {"id": producto_id, "nombre": nombre or f"Prod-{producto_id}", "precio": precio, "stock": 0}
-        _agregar_producto_nuevo(prod)
+        nuevo = {"id": producto_id, "nombre": (nombre or f"Prod-{producto_id}"), "precio": precio, "stock": 0}
+        cargar("productos", nuevo)
+        productos.append(nuevo)
+        prod_memoria = nuevo
+    elif (prod_memoria is None) and (prod_archivo is not None):
+        productos.append(prod_archivo)
+        prod_memoria = prod_archivo
 
-    # cantidad y costo
-    txt = input("Cantidad: ").strip()
-    if not txt.isdigit():
+    texto = input("Cantidad: ").strip()
+    if not texto.isdigit():
         print("Cantidad inválida.")
         return None
-    cantidad = int(txt)
+    cantidad = int(texto)
 
     try:
         costo_unitario = float(input("Costo unitario: ").strip())
@@ -55,13 +48,16 @@ def registrar_compra():
         print("Error: cantidad y costo deben ser > 0.")
         return None
 
+    """Fecha (vacío = hoy)"""
     fecha_txt = input("Fecha (YYYY-MM-DD, vacío = hoy): ").strip()
     fecha = fecha_txt if fecha_txt else datetime.now().strftime("%Y-%m-%d")
 
-    # actualizar stock usando el módulo de stock +
+    """Actualizo stock en memoria"""
     actualizar_stock(producto_id, cantidad, "compra")
+    prod_actual = obtener_producto_por_codigo(producto_id)
+    if prod_actual:
+        actualizar("productos", prod_actual)
 
-    # guardar registro en la sesión 
     registro = {
         "tipo": "compra",
         "fecha": fecha,

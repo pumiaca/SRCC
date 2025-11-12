@@ -1,23 +1,31 @@
-# ventas.py
 from datetime import datetime
 from productos import productos, obtener_producto_por_codigo
 from stock import actualizar_stock
+from persistencia import leer, actualizar
 
 ventas = []
 
 def registrar_venta():
-    """Carga una venta por consola. Verifica stock y actualiza stock -."""
+    """Pide datos por consola. Verifica existencia y stock."""
+    productos_archivo = leer("productos")
+
     producto_id = input("Código de producto: ").strip()
-    prod = obtener_producto_por_codigo(producto_id)
-    if prod is None:
+
+    prod_memoria = obtener_producto_por_codigo(producto_id)
+    prod_archivo = next((p for p in productos_archivo if str(p.get("id")) == str(producto_id)), None)
+
+    if (prod_memoria is None) and (prod_archivo is None):
         print("Error: el producto no existe. Primero registrá una compra para crearlo/stockearlo.")
         return None
+    elif (prod_memoria is None) and (prod_archivo is not None):
+        productos.append(prod_archivo)
+        prod_memoria = prod_archivo
 
-    txt = input("Cantidad: ").strip()
-    if not txt.isdigit():
+    texto = input("Cantidad: ").strip()
+    if not texto.isdigit():
         print("Cantidad inválida.")
         return None
-    cantidad = int(txt)
+    cantidad = int(texto)
 
     try:
         precio_unitario = float(input("Precio unitario: ").strip())
@@ -29,17 +37,22 @@ def registrar_venta():
         print("Error: cantidad y precio deben ser > 0.")
         return None
 
-    stock_actual = int(prod.get("stock", 0))
+    stock_actual = int(prod_memoria.get("stock", 0))
     if stock_actual < cantidad:
         print("Error: stock insuficiente. Hay " + str(stock_actual) + " y se pidió " + str(cantidad))
         return None
 
+    """Fecha (vacío = hoy)"""
     fecha_txt = input("Fecha (YYYY-MM-DD, vacío = hoy): ").strip()
     fecha = fecha_txt if fecha_txt else datetime.now().strftime("%Y-%m-%d")
 
-    # actualizar stock usando el módulo de stock -
+    """Actualizo stock en memoria"""
     actualizar_stock(producto_id, cantidad, "venta")
+    prod_actual = obtener_producto_por_codigo(producto_id)
+    if prod_actual:
+        actualizar("productos", prod_actual)
 
+    """Registro de venta"""
     registro = {
         "tipo": "venta",
         "fecha": fecha,
@@ -51,6 +64,7 @@ def registrar_venta():
     ventas.append(registro)
     print("Venta registrada.")
     return registro
+
 
 def listar_ventas():
     """Muestra ventas en consola."""
