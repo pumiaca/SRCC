@@ -2,6 +2,8 @@
 # Control de stock
 from tabulate import tabulate
 from productos import productos, obtener_producto_por_codigo
+from persistencia import actualizar, leer, cargar, borrar
+from utilidades import limpiar_consola
 
 OPERACIONES = ("venta", "compra")
 
@@ -9,6 +11,9 @@ def verificar_stock():
     '''
     Lista el stock de todos los productos y alerta si hay bajo stock.
     '''
+    limpiar_consola()
+    productos = []
+    productos.extend(leer("productos"))
     if not productos:
         print("No hay productos cargados.")
         return
@@ -43,11 +48,13 @@ def actualizar_stock(codigo, cantidad, operacion):
     if operacion == "venta":
         if producto["stock"] >= cantidad:
             producto["stock"] -= cantidad
+            actualizar("productos", producto)
             print(f"Venta realizada. Nuevo stock de {producto['nombre']}: {producto['stock']}")
         else:
             print(f"Stock insuficiente para vender {cantidad} unidades.")
     elif operacion == "compra":
         producto["stock"] += cantidad
+        actualizar("productos", producto)
         print(f"Compra registrada. Nuevo stock de {producto['nombre']}: {producto['stock']}")
 
     if producto["stock"] < 5:
@@ -58,6 +65,7 @@ def menu_stock():
     '''
     Menú principal de control de stock con validación de inputs.
     '''
+    limpiar_consola()
     while True:
         print("\n=== MENU DE GESTION DE STOCK ===")
         print("1. Verificar stock")
@@ -89,6 +97,7 @@ def menu_stock():
             actualizar_stock(codigo, cantidad, operacion)
 
         elif opcion == "3":
+            limpiar_consola()
             break
         else:
             print("Opción inválida. Intente de nuevo.")

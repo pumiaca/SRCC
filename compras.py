@@ -1,106 +1,160 @@
-# compras.py
 from datetime import datetime
-import json, os
-from productos import productos, obtener_producto_por_codigo
+from productos import productos, obtener_producto_por_codigo, crear_producto, agregar_producto
 from stock import actualizar_stock
+from persistencia import leer, cargar, actualizar
+from tabulate import tabulate
+from utilidades import limpiar_consola
 
 compras = []
 
-#  crear producto nuevo en JSON y en memoria 
-def _agregar_producto_nuevo(producto_dict, ruta="productos.json"):
-    # guardar en JSON 
-    data = []
-    if os.path.exists(ruta):
-        with open(ruta, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    data.append(producto_dict)
-    with open(ruta, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-
-    # reflejar en la lista 'productos' en memoria (si está)
-    productos.append(producto_dict)
-
 def registrar_compra():
-    """Carga una compra por consola. Crea el producto si no existe y actualiza stock (+)."""
+    '''
+    Registra una compra, actualizando costo, stock y precio de venta del producto.
+    '''
+    limpiar_consola()
+    productos_archivo = leer("productos")
     producto_id = input("Código de producto: ").strip()
-    prod = obtener_producto_por_codigo(producto_id)
 
-    # si no existe, ofrecer crearlo para poder comprar
-    if prod is None:
-        print("El producto no existe. Vamos a crearlo para poder comprarlo.")
-        nombre = input("Nombre del producto: ").strip()
-        precio_txt = input("Precio de venta (vacío = 0): ").strip()
-        try:
-            precio = float(precio_txt) if precio_txt else 0.0
-        except:
-            print("Precio inválido. Se usará 0.")
-            precio = 0.0
-        prod = {"id": producto_id, "nombre": nombre or f"Prod-{producto_id}", "precio": precio, "stock": 0}
-        _agregar_producto_nuevo(prod)
+    # Buscar producto en memoria o archivo
+    prod_memoria = obtener_producto_por_codigo(producto_id)
+    prod_archivo = next((p for p in productos_archivo if str(p.get("id")) == str(producto_id)), None)
 
-    # cantidad y costo
-    txt = input("Cantidad: ").strip()
-    if not txt.isdigit():
+    # Si el producto no existe, crear uno nuevo
+    if prod_memoria is None and prod_archivo is None:
+        print("El producto no existe. Vamos a crearlo.")
+        p = crear_producto()
+        if agregar_producto(p):
+            print("Producto agregado.")
+        else:
+            print("Error al agregar producto.")
+            return None
+        prod_memoria = p
+    elif prod_memoria is None and prod_archivo is not None:
+        productos.append(prod_archivo)
+        actualizar("productos", prod_archivo)
+        prod_memoria = prod_archivo
+
+    # Pedir datos de compra
+    print("Registrando compra para el producto: ", prod_memoria["nombre"])
+    texto = input("Cantidad a Comprar: ").strip()
+    if not texto.isdigit():
         print("Cantidad inválida.")
         return None
-    cantidad = int(txt)
+    cantidad = int(texto)
 
     try:
-        costo_unitario = float(input("Costo unitario: ").strip())
-    except:
+        costo_unitario = float(input("Costo unitario (precio de compra): ").strip())
+    except ValueError:
         print("Costo inválido.")
+        return None
+
+    try:
+        precio_venta = float(input("Nuevo precio de venta (vacío = mantener actual): ").strip() or 0)
+    except ValueError:
+        print("Precio de venta inválido.")
         return None
 
     if cantidad <= 0 or costo_unitario <= 0:
         print("Error: cantidad y costo deben ser > 0.")
         return None
 
+    # Fecha (vacío = hoy)
     fecha_txt = input("Fecha (YYYY-MM-DD, vacío = hoy): ").strip()
     fecha = fecha_txt if fecha_txt else datetime.now().strftime("%Y-%m-%d")
 
-    # actualizar stock usando el módulo de stock +
-    actualizar_stock(producto_id, cantidad, "compra")
+    # --- Actualización del producto ---
+    prod_actual = obtener_producto_por_codigo(producto_id)
+    if prod_actual:
+        # Actualizar stock (suma la cantidad comprada)
+        prod_actual["stock"] = prod_actual.get("stock", 0) + cantidad
 
-    # guardar registro en la sesión 
+        # Actualizar costo (precio de compra)
+        prod_actual["costo"] = costo_unitario
+
+        # Actualizar precio de venta si se ingresó un nuevo valor
+        if precio_venta > 0:
+            prod_actual["precio"] = precio_venta
+
+        actualizar("productos", prod_actual) 
+
     registro = {
         "tipo": "compra",
         "fecha": fecha,
         "producto_id": producto_id,
         "cantidad": cantidad,
         "costo_unitario": float(costo_unitario),
+        "precio_venta": float(precio_venta) if precio_venta else prod_actual.get("precio", 0),
         "total": float(costo_unitario) * cantidad,
     }
+
     compras.append(registro)
-    print("Compra registrada.")
+    cargar("compras", registro)
+    print("Compra registrada y producto actualizado correctamente.")
+
     return registro
 
 def listar_compras():
-    """Muestra compras en consola."""
-    if len(compras) == 0:
-        print("No hay compras.")
+    '''
+    Muestra compras en consola con nombre del producto, precios y formato de moneda.
+    '''
+    limpiar_consola()
+    compras = []
+    productos = []
+    productos.extend(leer("productos"))
+    compras.extend(leer("compras"))
+
+    if not compras:
+        print("No hay compras cargadas.")
         return
-    numero = 1
-    for c in compras:
-        print(str(numero) + ". Fecha: " + str(c["fecha"]) +
-              " | Producto: " + str(c["producto_id"]) +
-              " | Cantidad: " + str(c["cantidad"]) +
-              " | Costo: " + str(c["costo_unitario"]) +
-              " | Total: " + str(c["total"]))
-        numero = numero + 1
+
+    compras_lista = [compras] if isinstance(compras, dict) else compras
+
+    tabla = []
+    for c in compras_lista:
+        producto_id = c["producto_id"]
+
+        # Buscar el producto en la lista por id
+        producto = next((p for p in productos if str(p["id"]) == str(producto_id)), None)
+        nombre_producto = producto["nombre"] if producto else f"ID {producto_id}"
+
+        # Formatear los valores monetarios
+        costo_unitario = f"${c['costo_unitario']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        precio_venta = f"${c.get('precio_venta', 0):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        total = f"${c['total']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+        tabla.append([
+            c["tipo"],
+            c["fecha"],
+            nombre_producto,
+            c["cantidad"],
+            costo_unitario,
+            precio_venta,
+            total
+        ])
+
+    headers = ["Tipo", "Fecha", "Producto", "Cantidad", "Costo Unitario", "Precio Venta", "Costo Total"]
+    print(tabulate(tabla, headers=headers, tablefmt="grid"))
 
 def menu_compras():
+    '''
+    Menú de compras.
+    Permite registrar y listar compras.
+    '''
+    limpiar_consola()
+
     while True:
-        print("\n--- COMPRAS ---")
+        print("\n=== COMPRAS ===")
         print("1. Registrar compra")
         print("2. Listar compras")
-        print("0. Volver")
+        print("3. Volver")
         opcion = input("Opción: ").strip()
 
         if opcion == "1":
             registrar_compra()
         elif opcion == "2":
             listar_compras()
-        elif opcion == "0":
+        elif opcion == "3":
+            limpiar_consola()
             break
         else:
             print("Opción inválida.")

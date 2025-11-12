@@ -3,6 +3,7 @@
 import re
 from tabulate import tabulate
 from persistencia import cargar, leer, actualizar, borrar
+from utilidades import limpiar_consola
 
 productos = []
 
@@ -11,6 +12,7 @@ def menu_productos():
     Menú para la gestión de productos.
     Permite agregar, buscar, borrar y listar productos.
     '''
+    limpiar_consola()
 
     while True:
         print("\n=== MENU DE PRODUCTOS ===")
@@ -26,7 +28,6 @@ def menu_productos():
         if opcion_p == "1":
             p = crear_producto()
             if agregar_producto(p):
-                cargar('productos', p)
                 print("Producto agregado.")
         elif opcion_p == "2":
             codigo = input("Ingrese Código del Producto: ").strip()
@@ -48,11 +49,13 @@ def menu_productos():
             if p is None:
                 print("Producto no Encontrado.")
             else:
+                borrar('productos', p)
                 productos.remove(p)
                 print("Producto Borrado.")
         elif opcion_p == "5":
             listar_productos()
         elif opcion_p == "6":
+            limpiar_consola()
             break
         else:
             print("Opción inválida")
@@ -63,6 +66,7 @@ def crear_producto():
     Retorna un diccionario con la información del producto.
     Incluye validaciones de entrada.
     '''
+    limpiar_consola()
     while True:
         codigo = input("Código: ").strip()
         if not codigo:
@@ -114,6 +118,10 @@ def listar_productos():
     - Si no hay productos, indica que no hay productos cargados.
     Retorna None.
     '''
+    limpiar_consola()
+    productos = []
+    productos.extend(leer("productos"))
+
     if not productos:
         print("No hay productos cargados.")
         return
@@ -130,6 +138,10 @@ def listar_producto_buscado(Producto):
     - Si no hay productos, indica que no hay productos cargados.
     Retorna None.
     '''
+    limpiar_consola()
+    productos = []
+    productos.extend(leer("productos"))
+
     if not Producto:
         print("No hay productos cargados.")
         return
@@ -150,10 +162,16 @@ def agregar_producto(p):
     - p: dict (producto)
     Retorna True si se agregó correctamente, False si ya existe un producto con el mismo código.
     '''
+    limpiar_consola()
+
+    productos = []
+    productos.extend(leer("productos"))
+
     if any(x["id"] == p["id"] for x in productos):
         print("Ya existe un producto con ese código.")
         return False
     productos.append(p)
+    cargar('productos', p)
 
     return True
 
@@ -163,6 +181,10 @@ def obtener_producto_por_codigo(codigo):
     - codigo: str
     Retorna el producto si lo encuentra, None si no lo encuentra.
     '''
+    limpiar_consola()
+    productos = []
+    productos.extend(leer("productos"))
+
     for p in productos:
         if p["id"] == codigo:
             return p
@@ -176,11 +198,13 @@ def obtener_producto_por_descripcion(descripcion):
     Retorna una lista con los productos encontrados.
     Si no encuentra nada, retorna una lista vacía.
     '''
+    limpiar_consola()
+    productos = []
+    productos.extend(leer("productos"))
+
     encontrados = []
     for p in productos:
         if re.search(descripcion, p["nombre"], re.IGNORECASE):
             encontrados.append(p)
-    
-    print(encontrados)
     
     return encontrados
