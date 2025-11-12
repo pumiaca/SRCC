@@ -1,16 +1,32 @@
-import re
-import tabulate
+from tabulate import tabulate
+import persistencia as p
+from datetime import datetime as d
 
+
+def validacionFechas(desdeFecha,hastaFecha):
+
+    formato = "%Y-%m-%d"
+    try:
+        desde = d.strptime(desdeFecha, formato)
+        hasta = d.strptime(hastaFecha, formato)
+    except ValueError:
+        raise ValueError("Formato de fecha inválido o fecha inexistente. Use 'YYYY-MM-DD'.")
+        
+    if desde > hasta:
+        raise ValueError("La fecha 'desde' debe ser anterior o igual a la fecha 'hasta'.")
+    else:
+        return desde, hasta
+    
 # Cálculo de ingresos, egresos y balance
 
-def calcularIngresos(ventas, desdeFecha, hastaFecha): 
+def calcularIngresos(desdeFecha, hastaFecha): 
     """
     Calcula el total de ingresos en un período dado y muestra
     los resultados en una tabla con tabulate, con manejo de excepciones.
 
     Parámetros:
-        ventas (list[dict]): Lista de ventas, cada una con al menos 'fecha' y 'total'.
-        desdeFecha, hastaFecha (int): Índices para hacer slicing sobre la lista ventas.
+        ventas (json): archivo de ventas, cada una con al menos 'fecha' y 'total'.
+        desdeFecha, hastaFecha (date): parametros de inicio y fin de la muestra.
     
     Retorna:
         str: Tabla formateada con las ventas y una fila de totales.
@@ -19,30 +35,26 @@ def calcularIngresos(ventas, desdeFecha, hastaFecha):
     iva = 0.21
 
     try:
-        # Intentar extraer el rango de ventas
-        detalle = ventas[desdeFecha:hastaFecha]
+        # Intentar extraer la muestra de ventas
+        desde, hasta = validacionFechas(desdeFecha, hastaFecha)
+        ventas = p.leer('ventasFakeParaTest')
+        formato = "%Y-%m-%d"
+        muestra = [v for v in ventas if desde <= d.strptime(v["fecha"],formato) <= hasta]
 
-        if not detalle:
+        if not muestra:
             raise ValueError("No se encuentran registros en el periodo seleccionado.")
-
-        # Validar formato de fecha
-        primeraFecha = detalle[0]['fecha']
-        regexFecha = r"^\d{4}-\d{2}-\d{2}$"
-
-        if not re.match(regexFecha, primeraFecha):
-            raise ValueError(f"Fecha inválida: {primeraFecha}")
 
         # Lambda para calcular IVA
         calcularIVA = lambda total: total * iva
 
         # Calcular totales
-        totalIngresos = sum([venta['total'] for venta in detalle])
-        totalIVA = sum([calcularIVA(venta['total']) for venta in detalle])
+        totalIngresos = sum([t['total'] for t in muestra])
+        totalIVA = sum([calcularIVA(t['total']) for t in muestra])
 
         # Crear tabla
-        headers = list(detalle[0].keys()) + ["IVA"]
+        headers = list(muestra[0].keys()) + ["IVA"]
         tabla = [
-            [v[h] for h in detalle[0].keys()] + [calcularIVA(v['total'])] for v in detalle
+            [v[h] for h in muestra[0].keys()] + [calcularIVA(v['total'])] for v in muestra
         ]
 
         # Agregar fila total
@@ -52,9 +64,9 @@ def calcularIngresos(ventas, desdeFecha, hastaFecha):
         return tabulate(tabla, headers=headers, tablefmt="grid")
 
     except IndexError:
-        return "Error: los índices seleccionados están fuera del rango de la lista."
+        return "Error: la muestra seleccionada está fuera del rango de la lista."
     except KeyError as e:
-        return f"Error: falta la clave {e} en uno de los registros."
+        return f"Error: la clave {e} no es uno de los registros."
     except TypeError:
         return "Error: los valores de 'total' deben ser numéricos."
     except ValueError as ve:
@@ -62,49 +74,42 @@ def calcularIngresos(ventas, desdeFecha, hastaFecha):
     except Exception as e:
         return f"Ocurrió un error inesperado: {e}"
 
-def calcularEgresos(compras, desdeFecha, hastaFecha):
+def calcularEgresos(desdeFecha, hastaFecha): 
     """
-    Calcula el total de egresos en un período dado.
+    Calcula el total de EGRESOS en un período dado y muestra
+    los resultados en una tabla con tabulate, con manejo de excepciones.
 
     Parámetros:
-        compras (dict): Lista de compras, cada una con al menos 'fecha' y 'total'.
-        desdeFecha, hastaFecha (int): Índices para hacer slicing sobre la lista de compras.
+        ventas (json): archivo de compras, cada una con al menos 'fecha' y 'total'.
+        desdeFecha, hastaFecha (date): parametros de inicio y fin de la muestra.
     
     Retorna:
-        tuple: (fecha_inicio, totalEgresos, totalIVA)
-            - fechaInicio (str): Fecha de la primera compra en el rango.
-            - totalEgresos (float): Suma total de los egresos en el período.
-            - totalIVA (float): Total de IVA pagado en las compras.
+        str: Tabla formateada con las compras y una fila de totales.
     """
-
 
     iva = 0.21
 
     try:
-        # Intentar obtener el rango de compras
-        detalle = compras[desdeFecha:hastaFecha]
+        # Intentar extraer la muestra de ventas
+        desde, hasta = validacionFechas(desdeFecha, hastaFecha)
+        compras = p.leer('comprasFakeParaTest')
+        formato = "%Y-%m-%d"
+        muestra = [c for c in compras if desde <= d.strptime(c["fecha"],formato) <= hasta]
 
-        if not detalle:
-            raise ValueError("No se encuentran registros de compras en el periodo seleccionado.")
+        if not muestra:
+            raise ValueError("No se encuentran registros en el periodo seleccionado.")
 
-        # Validar formato de fecha
-        primeraFecha = detalle[0]['fecha']
-        regexFecha = r"^\d{4}-\d{2}-\d{2}$"
-
-        if not re.match(regexFecha, primeraFecha):
-            raise ValueError(f"Fecha inválida: {primeraFecha}")
-
-        # Lambda para calcular IVA de una compra
+        # Lambda para calcular IVA
         calcularIVA = lambda total: total * iva
 
         # Calcular totales
-        totalEgresos = sum([compra['total'] for compra in detalle])
-        totalIVA = sum([calcularIVA(compra['total']) for compra in detalle])
+        totalEgresos = sum([t['total'] for t in muestra])
+        totalIVA = sum([calcularIVA(t['total']) for t in muestra])
 
         # Crear tabla
-        headers = list(detalle[0].keys()) + ["IVA"]
+        headers = list(muestra[0].keys()) + ["IVA"]
         tabla = [
-            [c[h] for h in detalle[0].keys()] + [calcularIVA(c['total'])] for c in detalle
+            [c[h] for h in muestra[0].keys()] + [calcularIVA(c['total'])] for c in muestra
         ]
 
         # Agregar fila total
@@ -114,26 +119,27 @@ def calcularEgresos(compras, desdeFecha, hastaFecha):
         return tabulate(tabla, headers=headers, tablefmt="grid")
 
     except IndexError:
-        return "Error: los índices seleccionados están fuera del rango de la lista."
+        return "Error: la muestra seleccionada está fuera del rango de la lista."
     except KeyError as e:
-        return f"Error: falta la clave {e} en uno de los registros de compras."
+        return f"Error: la clave {e} no es uno de los registros."
     except TypeError:
         return "Error: los valores de 'total' deben ser numéricos."
     except ValueError as ve:
         return f"Error de validación: {ve}"
     except Exception as e:
         return f"Ocurrió un error inesperado: {e}"
+
     
-def balance(ventas, compras, desdeVenta, hastaVenta, desdeCompra, hastaCompra):
+def balance(desdeVenta, hastaVenta, desdeCompra, hastaCompra):
 
     '''
     Calcula el balance financiero entre ingresos (ventas) y egresos (compras).
     
     Parámetros:
-        ventas (list[dict]): Lista de ventas con 'fecha' y 'total'.
-        compras (list[dict]): Lista de compras con 'fecha' y 'total'.
-        desdeVenta, hastaVenta (int): Índices de rango para ventas.
-        desdeCompra, hastaCompra (int): Índices de rango para compras.
+        ventas (json): Lista de ventas con 'fecha' y 'total'.
+        compras (json): Lista de compras con 'fecha' y 'total'.
+        desdeVenta, hastaVenta (str): Índices de rango para ventas.
+        desdeCompra, hastaCompra (str): Índices de rango para compras.
     
     Retorna:
         Tabla formateada con resumen financiero del período.
@@ -144,27 +150,36 @@ def balance(ventas, compras, desdeVenta, hastaVenta, desdeCompra, hastaCompra):
         iva = 0.21
         calcularIVA = lambda total: total * iva
 
-        detalleVentas = ventas[desdeVenta:hastaVenta]
-        detalleCompras = compras[desdeCompra:hastaCompra]
+        # Validacion muestras ventas
+        desdeV, hastaV = validacionFechas(desdeVenta, hastaVenta)
+        ventas = p.leer('ventasFakeParaTest')
+        formato = "%Y-%m-%d"
+        muestraVentas = [v for v in ventas if desdeV <= d.strptime(v["fecha"],formato) <= hastaV]
 
-        if not detalleVentas and not detalleCompras:
+        #Validacion muestra compras
+        desdeC, hastaC = validacionFechas(desdeCompra, hastaCompra)
+        compras = p.leer('comprasFakeParaTest')
+        formato = "%Y-%m-%d"
+        muestraCompras = [c for c in compras if desdeC <= d.strptime(c["fecha"],formato) <= hastaC]
+
+        if not muestraVentas and not muestraCompras:
             return "No se encuentran registros en el periodo seleccionado."
 
         # Totales de ingresos
-        totalIngresos = sum([v['total'] for v in detalleVentas])
-        totalIVA_ing = sum([calcularIVA(v['total']) for v in detalleVentas])
+        totalIngresos = sum([v['total'] for v in muestraVentas])
+        totalIVAingresos = sum([calcularIVA(v['total']) for v in muestraVentas])
 
         # Totales de egresos
-        totalEgresos = sum([c['total'] for c in detalleCompras])
-        totalIVA_egr = sum([calcularIVA(c['total']) for c in detalleCompras])
+        totalEgresos = sum([c['total'] for c in muestraCompras])
+        totalIVAegresos = sum([calcularIVA(c['total']) for c in muestraCompras])
 
         # Resultado neto
         resultado = totalIngresos - totalEgresos
         estado = "GANANCIA" if resultado >= 0 else "PÉRDIDA"
 
         tabla = [
-            ["Ingresos", totalIngresos, totalIVA_ing],
-            ["Egresos", totalEgresos, totalIVA_egr],
+            ["Ingresos", totalIngresos, totalIVAingresos],
+            ["Egresos", totalEgresos, totalIVAegresos],
             ["", "", ""],
             ["Resultado neto", resultado, estado]
         ]
@@ -173,7 +188,56 @@ def balance(ventas, compras, desdeVenta, hastaVenta, desdeCompra, hastaCompra):
 
         return tabulate(tabla, headers=headers, tablefmt="grid")
 
-    except (KeyError, TypeError, IndexError) as e:
-        return f"Error al calcular el balance: {e}"
+    except IndexError:
+        return "Error: la muestra seleccionada está fuera del rango de la lista."
+    except KeyError as e:
+        return f"Error: la clave {e} no es uno de los registros."
+    except TypeError:
+        return "Error: los valores de 'total' deben ser numéricos."
+    except ValueError as ve:
+        return f"Error de validación: {ve}"
     except Exception as e:
         return f"Ocurrió un error inesperado: {e}"
+    
+def menuFinanzas():
+    '''
+    Menú principal del módulo FINANZAS.
+    '''
+    while True:
+        print("\n=== MENU DE FINANZAS ===")
+        print("1. Calcular ingresos")
+        print("2. Calcular egresos")
+        print("3. Calcular balance")
+        print("4. Regresar al menú principal")
+
+        opcion = input("Seleccione una opción: ").strip()
+
+        if opcion == "1":
+            desde = input("Ingrese fecha DESDE (YYYY-MM-DD): ").strip()
+            hasta = input("Ingrese fecha HASTA (YYYY-MM-DD): ").strip()
+            resultado = calcularIngresos(desde, hasta)
+            print("\n" + str(resultado))
+
+        elif opcion == "2":
+            desde = input("Ingrese fecha DESDE (YYYY-MM-DD): ").strip()
+            hasta = input("Ingrese fecha HASTA (YYYY-MM-DD): ").strip()
+            resultado = calcularEgresos(desde, hasta)
+            print("\n" + str(resultado))
+
+        elif opcion == "3":
+            print("\n=== BALANCE GENERAL ===")
+            print("Rango de VENTAS:")
+            desdeV = input("Ingrese fecha DESDE (YYYY-MM-DD): ").strip()
+            hastaV = input("Ingrese fecha HASTA (YYYY-MM-DD): ").strip()
+            print("\nRango de COMPRAS:")
+            desdeC = input("Ingrese fecha DESDE (YYYY-MM-DD): ").strip()
+            hastaC = input("Ingrese fecha HASTA (YYYY-MM-DD): ").strip()
+            resultado = balance(desdeV, hastaV, desdeC, hastaC)
+            print("\n" + str(resultado))
+
+        elif opcion == "4":
+            print("Regresando al menú principal...")
+            break
+
+        else:
+            print("Opción inválida. Intente nuevamente.")

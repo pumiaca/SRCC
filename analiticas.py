@@ -1,7 +1,9 @@
 import re
-from datetime import datetime
-import tabulate
+from datetime import datetime as d
+from tabulate import tabulate
 import persistencia as p
+from finanzas import validacionFechas
+
 
 def proyectarIngresos(desdeFecha):
     """
@@ -16,14 +18,12 @@ def proyectarIngresos(desdeFecha):
 
     try:
         # Validar formato de fecha
-        formatoFecha = r"^\d{4}-\d{2}-\d{2}$"
-        if not re.match(formatoFecha, desdeFecha):
-            raise ValueError("Formato de fecha inválido. Use 'YYYY-MM-DD'.")
-
-        # Convertir a objeto datetime para usarlo despues y valida q sea coherente
-        fechaInicio = datetime.strptime(desdeFecha, "%Y-%m-%d")
-        fechaActual = datetime.now()
-        diasPeriodo = (fechaActual - fechaInicio).days
+        desde = validacionFechas(desdeFecha)
+        ventas = p.leer('ventasFakeParaTest')
+        formato = "%Y-%m-%d"
+        # Convertir a objeto d para usarlo despues y valida q sea coherente
+        fechaActual = d.now()
+        diasPeriodo = (fechaActual - desde).days
 
         if diasPeriodo <= 0:
             raise ValueError("La fecha de inicio debe ser anterior a la actual.")
@@ -37,8 +37,8 @@ def proyectarIngresos(desdeFecha):
         ventasPeriodo = [
             v for v in ventas
             if "fecha" in v and
-                datetime.strptime(v["fecha"], "%Y-%m-%d") >= fechaInicio and
-                datetime.strptime(v["fecha"], "%Y-%m-%d") <= fechaActual
+                d.strptime(v["fecha"], formato) >= desde and
+                d.strptime(v["fecha"], formato) <= fechaActual
         ]
 
         if not ventasPeriodo:
@@ -55,8 +55,8 @@ def proyectarIngresos(desdeFecha):
         # Generar item del diccionario de resultados
         resultado = {
             "id": len(p.leer("proyeccion_ingresos")) + 1,
-            "fechaGeneracion": fechaActual.strftime("%Y-%m-%d"),
-            "periodoHistorico": f"{desdeFecha} → {fechaActual.strftime('%Y-%m-%d')}",
+            "fechaGeneracion": fechaActual.strftime(formato),
+            "periodoHistorico": f"{desde} → {fechaActual.strftime(formato)}",
             "diasAnalizados": diasPeriodo,
             "promedioDiario": round(promedioDiario, 2),
             "proyeccionFutura": proyeccionFutura
@@ -66,17 +66,19 @@ def proyectarIngresos(desdeFecha):
         p.cargar("proyeccionIngresos", resultado)
 
         print(f"Período analizado: {diasPeriodo} días")
-        print(f"Promedio diario: ${resultado['promedio_diario']}")
-        print(f"Proyección para los próximos {diasPeriodo} días: ${resultado['proyeccion_futura']}")
+        print(f"Promedio diario: ${resultado['promedioDiario']}")
+        print(f"Proyección para los próximos {diasPeriodo} días: ${resultado['proyeccionFutura']}")
 
         return resultado
 
-    except (ValueError, KeyError, TypeError) as e:
-        print(f"Error en proyectarIngresos(): {e}")
-        return None
+    except ValueError as e:
+        return f"Error: el valor {e} es invalido"
+    except KeyError as e:
+        return f"Error: la clave {e} no es valida"
+    except TypeError as e:
+        return f"Error inesperado: {e}"
     except Exception as e:
-        print(f"Error inesperado: {e}")
-        return None
+        return f"Error inesperado: {e}"
 
 def mostrarTopVentas(desdeFecha, hastaFecha, top: int = 5):
     """
@@ -90,16 +92,10 @@ def mostrarTopVentas(desdeFecha, hastaFecha, top: int = 5):
         None (imprime una tabla con los productos top en el período).
     """
     try:
-        formatoFecha = r"^\d{4}-\d{2}-\d{2}$"
-        if not re.match(formatoFecha, desdeFecha) or not re.match(formatoFecha, hastaFecha):
-            raise ValueError("Formato de fecha inválido. Use 'YYYY-MM-DD'.")
-        
-        if desdeFecha > hastaFecha:
-            raise ValueError("La fecha 'desde' debe ser anterior o igual a la fecha 'hasta'.")
-
-
-        # Leer JSON
-        ventas = p.leer("ventasFakeParaTest")
+        # Validar formato de fecha
+        desde, hasta = validacionFechas(desdeFecha, hastaFecha)
+        ventas = p.leer('ventasFakeParaTest')
+        formato = "%Y-%m-%d"
 
         if not ventas:
             raise FileNotFoundError("No se encontraron registros de ventas.")
@@ -107,7 +103,7 @@ def mostrarTopVentas(desdeFecha, hastaFecha, top: int = 5):
         # Filtrar ventas entre fechas (incluyendolas)
         ventasFiltradas = [
             v for v in ventas
-            if desdeFecha <= v["fecha"] <= hastaFecha
+            if desde <= d.strptime(v["fecha"],formato) <= hasta
         ]
 
         if not ventasFiltradas:
@@ -124,9 +120,11 @@ def mostrarTopVentas(desdeFecha, hastaFecha, top: int = 5):
             resumen[pid]["total"] += v["total"]
 
         # Ordenar productos por total vendido (descendente) con una lambda como criterio (?)
+        totalesV = lambda item: item[1]["total"]
+
         topVentas = sorted(
             resumen.items(),
-            key=lambda item: item[1]["total"],
+            key=totalesV,
             reverse=True
         )[:top]
 
@@ -161,41 +159,32 @@ def calcularROI(desdeFecha, hastaFecha):
         float: ROI expresado en porcentaje (%).
     """
     try:
-        # Validación del formato de fecha
-        formatoFecha = r"^\d{4}-\d{2}-\d{2}$"
-        if not re.match(formatoFecha, desdeFecha) or not re.match(formatoFecha, hastaFecha):
-            raise ValueError("Formato de fecha inválido. Use 'YYYY-MM-DD'.")
-
-        # Conversión a datetime para comparar orden
-        fechaDesde = datetime.strptime(desdeFecha, "%Y-%m-%d")
-        fechaHasta = datetime.strptime(hastaFecha, "%Y-%m-%d")
-
-        if fechaDesde > fechaHasta:
-            raise ValueError("La fecha 'desde' debe ser anterior o igual a la fecha 'hasta'.")
+        # Validacion muestras ventas
+        desde, hasta = validacionFechas(desdeFecha, hastaFecha)
+        ventas = p.leer('ventasFakeParaTest')
+        formato = "%Y-%m-%d"
 
         # Leer archivos de persistencia
-        ventas = p.leer("ventasFakesParaTest")
-        compras = p.leer("comprasFakesParaTest")
+        ventas = p.leer("ventasFakeParaTest")
+        compras = p.leer("comprasFakeParaTest")
 
-        if not ventas:
+        if not ventas or not compras:
             raise FileNotFoundError("No se encontraron registros de ventas.")
-        if not compras:
-            raise FileNotFoundError("No se encontraron registros de compras.")
 
-        # Recorrer los items de los json por fecha <=
+        # Recorrer los items de los json por fecha
         ventasPeriodo = [
             v for v in ventas
-            if datetime.strptime(v["fecha"], "%Y-%m-%d") >= fechaDesde
-            and datetime.strptime(v["fecha"], "%Y-%m-%d") <= fechaHasta
+            if d.strptime(v["fecha"], formato) >= desde
+            and d.strptime(v["fecha"], formato) <= hasta
         ]
         comprasPeriodo = [
             c for c in compras
-            if datetime.strptime(c["fecha"], "%Y-%m-%d") >= fechaDesde
-            and datetime.strptime(c["fecha"], "%Y-%m-%d") <= fechaHasta
+            if d.strptime(c["fecha"], formato) >= desde
+            and d.strptime(c["fecha"], formato) <= hasta
         ]
 
         if not ventasPeriodo or not comprasPeriodo:
-            print("No hay suficientes datos en el período seleccionado.")
+            print("No hay suficientes registros en el período seleccionado.")
             return None
 
         # Calcular ingresos y egresos totales y el famoso dividir por cero
@@ -211,7 +200,7 @@ def calcularROI(desdeFecha, hastaFecha):
 
         # Mostrar resultados
         print(f"ANÁLISIS DE RENTABILIDAD (ROI)")
-        print(f"Período: {desdeFecha} → {hastaFecha}")
+        print(f"Período: {desde} → {hasta}")
         print(f"Ingresos Totales: ${totalIngresos:,.2f}")
         print(f"Egresos Totales:  ${totalEgresos:,.2f}")
         print(f"ROI: {roi:.2f}%")
@@ -227,5 +216,41 @@ def calcularROI(desdeFecha, hastaFecha):
     except Exception as e:
         print(f"Error inesperado: {e}")
 
+def menuAnaliticas():
+    '''
+    Menú principal del módulo ANALÍTICAS.
+    '''
+    while True:
+        print("\n=== MENU DE ANALÍTICAS ===")
+        print("1. Proyectar ingresos")
+        print("2. Mostrar top ventas")
+        print("3. Calcular ROI")
+        print("4. Regresar al menú principal")
 
-calcularROI("2025-10-25", "2025-11-05")
+        opcion = input("Seleccione una opción: ").strip()
+
+        if opcion == "1":
+            desde = input("Ingrese la fecha DESDE (YYYY-MM-DD): ").strip()
+            resultado = proyectarIngresos(desde)
+            print("\nResultado de la proyección:\n", resultado)
+
+        elif opcion == "2":
+            desde = input("Ingrese la fecha DESDE (YYYY-MM-DD): ").strip()
+            hasta = input("Ingrese la fecha HASTA (YYYY-MM-DD): ").strip()
+            top = input("¿Cuántos productos desea mostrar? (por defecto = 5): ").strip()
+            top = int(top) if top.isdigit() and int(top) > 0 else 5
+            mostrarTopVentas(desde, hasta, top)
+
+        elif opcion == "3":
+            desde = input("Ingrese la fecha DESDE (YYYY-MM-DD): ").strip()
+            hasta = input("Ingrese la fecha HASTA (YYYY-MM-DD): ").strip()
+            roi = calcularROI(desde, hasta)
+            if roi is not None:
+                print(f"\nROI calculado: {roi:.2f}%")
+
+        elif opcion == "4":
+            print("Regresando al menú principal...")
+            break
+
+        else:
+            print("Opción inválida. Intente nuevamente.")

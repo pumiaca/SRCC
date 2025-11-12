@@ -1,82 +1,42 @@
 [
     {
         "tipo": "venta",
-        "fecha": "2025-10-07",
-        "producto_id": "P001",
+        "fecha": "2025-10-26",
+        "producto_id": "123",
         "cantidad": 5,
-        "precio_unitario": 1200.0,
-        "total": 6000.0
+        "precio_unitario": 234.0,
+        "total": 1170.0
     },
     {
         "tipo": "venta",
-        "fecha": "2025-10-10",
-        "producto_id": "P002",
-        "cantidad": 2,
-        "precio_unitario": 3500.0,
-        "total": 7000.0
-    },
-    {
-        "tipo": "venta",
-        "fecha": "2025-10-13",
-        "producto_id": "P003",
+        "fecha": "2025-10-30",
+        "producto_id": "456",
         "cantidad": 10,
-        "precio_unitario": 950.0,
-        "total": 9500.0
+        "precio_unitario": 24.0,
+        "total": 240.0
     },
     {
         "tipo": "venta",
-        "fecha": "2025-10-16",
-        "producto_id": "P001",
-        "cantidad": 3,
-        "precio_unitario": 1200.0,
-        "total": 3600.0
-    },
-    {
-        "tipo": "venta",
-        "fecha": "2025-10-20",
-        "producto_id": "P004",
-        "cantidad": 1,
-        "precio_unitario": 10000.0,
-        "total": 10000.0
-    },
-    {
-        "tipo": "venta",
-        "fecha": "2025-10-24",
-        "producto_id": "P002",
-        "cantidad": 4,
-        "precio_unitario": 3500.0,
-        "total": 14000.0
-    },
-    {
-        "tipo": "venta",
-        "fecha": "2025-10-27",
-        "producto_id": "P005",
+        "fecha": "2025-11-01",
+        "producto_id": "567",
         "cantidad": 8,
-        "precio_unitario": 800.0,
-        "total": 6400.0
+        "precio_unitario": 34.0,
+        "total": 272.0
     },
     {
         "tipo": "venta",
-        "fecha": "2025-10-29",
-        "producto_id": "P003",
-        "cantidad": 7,
-        "precio_unitario": 950.0,
-        "total": 6650.0
+        "fecha": "2025-11-03",
+        "producto_id": "4678",
+        "cantidad": 6,
+        "precio_unitario": 34.0,
+        "total": 204.0
     },
     {
         "tipo": "venta",
-        "fecha": "2025-11-02",
-        "producto_id": "P002",
-        "cantidad": 3,
-        "precio_unitario": 3500.0,
-        "total": 10500.0
-    },
-    {
-        "tipo": "venta",
-        "fecha": "2025-11-04",
-        "producto_id": "P004",
-        "cantidad": 2,
-        "precio_unitario": 10000.0,
-        "total": 20000.0
+        "fecha": "2025-11-05",
+        "producto_id": "0001",
+        "cantidad": 12,
+        "precio_unitario": 56.0,
+        "total": 672.0
     }
 ]
