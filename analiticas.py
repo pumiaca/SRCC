@@ -263,6 +263,3 @@ def menuAnaliticas():
 
         else:
             print("Opción inválida. Intente nuevamente.")
-
-
-calcularROI('2025-01-01', '2025-12-31')

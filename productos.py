@@ -50,6 +50,7 @@ def menu_productos():
                 print("Producto no Encontrado.")
             else:
                 borrar('productos', p)
+                productos.remove(p)
                 print("Producto Borrado.")
         elif opcion_p == "5":
             listar_productos()
