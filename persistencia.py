@@ -1,4 +1,7 @@
 import json
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment
+from openpyxl.utils import get_column_letter
 
 def leer(archivo:str):
     """
@@ -96,4 +99,40 @@ def buscar_id(archivo:str, dato:dict):
     return registro
 
 
-buscar_id("productos", {"id":'9820'})
+def generar_reporte_stock(archivo:str):
+    """
+    Exportar datos a un archivo Excel.
+    Atributos:
+        - archivo: nombre del archivo sin extensión .xlsx
+        - datos: lista de diccionarios con los datos a exportar
+    Retorna:
+        Si el archivo se crea correctamente, devuelve True.
+        Si ocurre un error, devuelve el error.
+    """
+    try:
+        libro = Workbook()
+        hoja = libro.active
+        hoja.title = "Reporte de Stock"
+        # Encabezados
+        datos = leer(archivo)
+        headers = list(datos[0].keys())
+        hoja.append(headers)
+
+        for col_idx in range(1, 10):  # columnas 1 a 6 (A-F)
+            col = get_column_letter(col_idx)
+            celda = hoja[f'{col}1']
+            celda.font = Font(bold=True, size=12)
+            celda.alignment = Alignment(horizontal="center")
+
+        tabla = [[p[h] for h in headers] for p in datos]
+        for row in tabla:
+            hoja.append(row)
+
+        libro.save(f"./src/{archivo}.xlsx")
+        return True
+    except Exception as e:
+        print(f"Error al exportar a Excel: {e}")
+        return False
+    
+
+generar_reporte_stock("productos")
