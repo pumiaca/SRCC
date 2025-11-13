@@ -1,77 +1,110 @@
-import pytest
-from productos import productos
-from stock import verificar_stock, actualizar_stock
+import stock
 
-@pytest.fixture(autouse=True)
-def limpiar_productos():
-    """Limpia la lista global de productos antes de cada prueba."""
-    productos.clear()
-    yield
-    productos.clear()
+def producto_ejemplo(codigo="001", nombre="Pan", stock_cant=10):
+    return {"id": codigo, "nombre": nombre, "stock": stock_cant}
 
-def test_verificar_stock_sin_productos(capfd):
-    verificar_stock()
-    out, s = capfd.readouterr()
-    assert "No hay productos cargados" in out
+def test_verificar_stock_sin_productos(capsys):
+    stock.leer = lambda clave: []
+    stock.limpiar_consola = lambda: None
+    stock.tabulate = lambda *args, **kwargs: "TABLA_VACIA"
 
-def test_verificar_stock_con_productos_y_alerta(capfd):
-    productos.extend([
-        {"id": "001", "nombre": "Pan", "precio": 10.0, "stock": 2},
-        {"id": "002", "nombre": "Leche", "precio": 15.0, "stock": 8},
-    ])
-    verificar_stock()
-    out, s = capfd.readouterr()
-    assert "Pan" in out
-    assert "Leche" in out
+    stock.verificar_stock()
+    out = capsys.readouterr().out
+    assert "No hay productos cargados." in out
+
+def test_verificar_stock_con_productos(capsys):
+    productos = [producto_ejemplo("001", "Pan", 8), producto_ejemplo("002", "Leche", 2)]
+    stock.leer = lambda clave: productos
+    stock.limpiar_consola = lambda: None
+    stock.tabulate = lambda tabla, headers=None, tablefmt=None: str(tabla)
+
+    stock.verificar_stock()
+    out = capsys.readouterr().out
+    assert "001" in out
+    assert "002" in out
     assert "Bajo stock" in out
-    assert "OK" in out
 
-def test_actualizar_stock_operacion_invalida(capfd):
-    productos.append({"id": "001", "nombre": "Pan", "precio": 10.0, "stock": 10})
-    actualizar_stock("001", 5, "donacion")
-    out, s = capfd.readouterr()
+def test_actualizar_stock_operacion_invalida(capsys):
+    stock.obtener_producto_por_codigo = lambda codigo: None
+    stock.actualizar = lambda *a, **kw: None
+
+    stock.actualizar_stock("001", 1, "invalida")
+    out = capsys.readouterr().out
     assert "Operación inválida" in out
-    assert productos[0]["stock"] == 10
 
-def test_actualizar_stock_producto_no_encontrado(capfd):
-    productos.append({"id": "001", "nombre": "Pan", "precio": 10.0, "stock": 10})
-    actualizar_stock("999", 5, "venta")
-    out, s = capfd.readouterr()
-    assert "Producto con código 999 no encontrado" in out
-    assert productos[0]["stock"] == 10
 
-def test_actualizar_stock_cantidad_invalida(capfd):
-    productos.append({"id": "001", "nombre": "Pan", "precio": 10.0, "stock": 10})
-    actualizar_stock("001", 0, "venta")
-    out, s = capfd.readouterr()
-    assert "La cantidad debe ser un número entero positivo" in out
-    assert productos[0]["stock"] == 10
+def test_actualizar_stock_producto_no_encontrado(capsys):
+    stock.obtener_producto_por_codigo = lambda codigo: None
+    stock.actualizar = lambda *a, **kw: None
 
-def test_actualizar_stock_venta_exitosa(capfd):
-    productos.append({"id": "001", "nombre": "Pan", "precio": 10.0, "stock": 10})
-    actualizar_stock("001", 4, "venta")
-    out, s = capfd.readouterr()
+    stock.actualizar_stock("999", 1, "venta")
+    out = capsys.readouterr().out
+    assert "no encontrado" in out.lower()
+
+
+def test_actualizar_stock_cantidad_no_positiva(capsys):
+    prod = producto_ejemplo(stock_cant=10)
+    stock.obtener_producto_por_codigo = lambda codigo: prod
+    fue_actualizado = {"ok": False}
+    stock.actualizar = lambda *a, **kw: fue_actualizado.update(ok=True)
+
+    stock.actualizar_stock("001", 0, "venta")
+    out = capsys.readouterr().out
+    assert "número entero positivo" in out
+    assert not fue_actualizado["ok"]
+
+
+def test_actualizar_stock_venta_suficiente(capsys):
+    prod = producto_ejemplo(stock_cant=10)
+    actualizado = {}
+
+    def fake_actualizar(nombre, producto):
+        actualizado.update(producto)
+
+    stock.obtener_producto_por_codigo = lambda codigo: prod
+    stock.actualizar = fake_actualizar
+
+    stock.actualizar_stock("001", 3, "venta")
+    out = capsys.readouterr().out
     assert "Venta realizada" in out
-    assert productos[0]["stock"] == 6
-    assert "OK" not in out  # No imprime el estado de stock general
+    assert actualizado["stock"] == 7
 
-def test_actualizar_stock_venta_insuficiente(capfd):
-    productos.append({"id": "001", "nombre": "Pan", "precio": 10.0, "stock": 3})
-    actualizar_stock("001", 5, "venta")
-    out, s = capfd.readouterr()
+
+def test_actualizar_stock_venta_insuficiente(capsys):
+    prod = producto_ejemplo(stock_cant=2)
+    fue_actualizado = {"ok": False}
+
+    stock.obtener_producto_por_codigo = lambda codigo: prod
+    stock.actualizar = lambda *a, **kw: fue_actualizado.update(ok=True)
+
+    stock.actualizar_stock("001", 5, "venta")
+    out = capsys.readouterr().out
     assert "Stock insuficiente" in out
-    assert productos[0]["stock"] == 3  # No cambia
+    assert not fue_actualizado["ok"]
 
-def test_actualizar_stock_compra_exitosa(capfd):
-    productos.append({"id": "001", "nombre": "Leche", "precio": 15.0, "stock": 5})
-    actualizar_stock("001", 10, "compra")
-    out, s = capfd.readouterr()
+
+def test_actualizar_stock_compra(capsys):
+    prod = producto_ejemplo(stock_cant=4)
+    actualizado = {}
+
+    def fake_actualizar(nombre, producto):
+        actualizado.update(producto)
+
+    stock.obtener_producto_por_codigo = lambda codigo: prod
+    stock.actualizar = fake_actualizar
+
+    stock.actualizar_stock("001", 6, "compra")
+    out = capsys.readouterr().out
     assert "Compra registrada" in out
-    assert productos[0]["stock"] == 15
+    assert actualizado["stock"] == 10
 
-def test_actualizar_stock_dispara_alerta_bajo_stock(capfd):
-    productos.append({"id": "001", "nombre": "Pan", "precio": 10.0, "stock": 6})
-    actualizar_stock("001", 2, "venta")
-    out, s = capfd.readouterr()
-    assert "Alerta: El producto 'Pan' tiene bajo stock" in out
-    assert productos[0]["stock"] == 4
+
+def test_alerta_bajo_stock_se_muestra(capsys):
+    prod = producto_ejemplo(nombre="Manteca", stock_cant=6)
+
+    stock.obtener_producto_por_codigo = lambda codigo: prod
+    stock.actualizar = lambda *a, **kw: None
+
+    stock.actualizar_stock("001", 3, "venta")
+    out = capsys.readouterr().out
+    assert "Alerta" in out and "bajo stock" in out.lower()
