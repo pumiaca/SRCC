@@ -65,7 +65,7 @@ def proyectarIngresos(desdeFecha):
         }
 
         # Guardar usando el modulo de persistencia
-        p.cargar("proyeccionIngresos", resultado)
+        p.actualizar("proyeccionIngresos", resultado)
 
         print(f"Período analizado: {diasPeriodo} días")
         print(f"Promedio diario: ${resultado['promedioDiario']}")
