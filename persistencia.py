@@ -99,7 +99,7 @@ def buscar_id(archivo:str, dato:dict):
     return registro
 
 
-def generar_reporte_stock(archivo:str):
+def generar_reporte(archivo:str):
     """
     Exportar datos a un archivo Excel.
     Atributos:
@@ -135,4 +135,18 @@ def generar_reporte_stock(archivo:str):
         return False
     
 
-generar_reporte_stock("productos")
+def limpiar_datos(archivo:str):
+    """
+    Limpia los datos de un archivo JSON.
+    Atributos:
+        - archivo: nombre del archivo sin extensión .json
+    Retorna:
+        Si el archivo se limpia correctamente, devuelve True.
+        Si ocurre un error, devuelve el error.
+    """
+    try:
+        with open(f"./src/{archivo}.json", "w", encoding="utf-8") as archivo:
+            json.dump([], archivo)
+        return True
+    except Exception as e:
+        return f"Error al limpiar datos: {e}"
