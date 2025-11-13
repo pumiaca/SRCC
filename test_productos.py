@@ -1,92 +1,95 @@
-import pytest
-import re
-from productos import (
-    productos,
-    agregar_producto,
-    obtener_producto_por_codigo,
-    obtener_producto_por_descripcion,
-    listar_productos,
-    listar_producto_buscado
-)
+import productos
 
-@pytest.fixture(autouse=True)
-def limpiar_productos():
-    """Limpia la lista global de productos antes de cada prueba."""
-    productos.clear()
-    yield
-    productos.clear()
+def prod(id="001", nombre="Pan", precio=10.5, stock=8):
+    return {"id": id, "nombre": nombre, "precio": precio, "stock": stock}
 
-def test_agregar_producto_exitoso():
-    p = {"id": "001", "nombre": "Pan", "precio": 10.0, "stock": 50}
-    resultado = agregar_producto(p)
+def test_listar_productos_sin_datos(capsys):
+    productos.leer = lambda clave: []
+    productos.limpiar_consola = lambda: None
+    productos.tabulate = lambda *a, **k: "TABLA_FAKE"
+
+    productos.listar_productos()
+    out = capsys.readouterr().out
+    assert "No hay productos cargados." in out
+
+def test_listar_productos_con_datos(capsys):
+    productos.leer = lambda clave: [prod("001", "Pan", 10.5, 8)]
+    productos.limpiar_consola = lambda: None
+    productos.tabulate = lambda tabla, headers=None, tablefmt=None: str(tabla)
+
+    productos.listar_productos()
+    out = capsys.readouterr().out
+    assert "001" in out and "Pan" in out
+
+def test_listar_producto_buscado_dict(capsys):
+    productos.leer = lambda clave: [prod()]
+    productos.limpiar_consola = lambda: None
+    productos.tabulate = lambda *a, **k: "TABLA_FAKE"
+
+    productos.listar_producto_buscado(prod())
+    out = capsys.readouterr().out
+    assert "TABLA_FAKE" in out
+
+
+def test_listar_producto_buscado_vacio(capsys):
+    productos.leer = lambda clave: []
+    productos.limpiar_consola = lambda: None
+    productos.tabulate = lambda *a, **k: "TABLA_FAKE"
+
+    productos.listar_producto_buscado(None)
+    out = capsys.readouterr().out
+    assert "No hay productos cargados." in out
+
+def test_agregar_producto_nuevo(capsys):
+    productos.leer = lambda clave: []
+    productos.cargar = lambda clave, p: None
+    productos.limpiar_consola = lambda: None
+
+    p = prod()
+    resultado = productos.agregar_producto(p)
     assert resultado is True
-    assert len(productos) == 1
-    assert productos[0]["nombre"] == "Pan"
 
-def test_agregar_producto_duplicado(capfd):
-    p1 = {"id": "001", "nombre": "Pan", "precio": 10.0, "stock": 50}
-    p2 = {"id": "001", "nombre": "Galletas", "precio": 5.0, "stock": 20}
-    agregar_producto(p1)
-    resultado = agregar_producto(p2)
-    out, a = capfd.readouterr()
-    assert "Ya existe un producto con ese código" in out
-    assert resultado is False
-    assert len(productos) == 1
+def test_agregar_producto_duplicado(capsys):
+    productos.leer = lambda clave: [prod("001")]
+    productos.cargar = lambda clave, p: None
+    productos.limpiar_consola = lambda: None
+
+    p = prod("001")
+    resultado = productos.agregar_producto(p)
+    out = capsys.readouterr().out
+    assert not resultado
+    assert "Ya existe un producto" in out
 
 def test_obtener_producto_por_codigo_encontrado():
-    p = {"id": "A100", "nombre": "Leche", "precio": 20.0, "stock": 10}
-    productos.append(p)
-    resultado = obtener_producto_por_codigo("A100")
-    assert resultado == p
+    p = prod("123")
+    productos.leer = lambda clave: [p]
+    productos.limpiar_consola = lambda: None
+
+    encontrado = productos.obtener_producto_por_codigo("123")
+    assert encontrado == p
 
 def test_obtener_producto_por_codigo_no_encontrado():
-    p = {"id": "A100", "nombre": "Leche", "precio": 20.0, "stock": 10}
-    productos.append(p)
-    resultado = obtener_producto_por_codigo("X999")
-    assert resultado is None
+    productos.leer = lambda clave: [prod("001")]
+    productos.limpiar_consola = lambda: None
 
-def test_obtener_producto_por_descripcion_encontrado(capfd):
-    productos.extend([
-        {"id": "001", "nombre": "Pan", "precio": 10.0, "stock": 5},
-        {"id": "002", "nombre": "Pan dulce", "precio": 15.0, "stock": 10},
-        {"id": "003", "nombre": "Leche", "precio": 20.0, "stock": 8}
-    ])
-    resultado = obtener_producto_por_descripcion("Pan")
-    out, a = capfd.readouterr()
-    assert len(resultado) == 2
-    assert all("Pan" in p["nombre"] for p in resultado)
-    assert isinstance(resultado, list)
+    encontrado = productos.obtener_producto_por_codigo("999")
+    assert encontrado is None
 
-def test_obtener_producto_por_descripcion_no_encontrado(capfd):
-    productos.append({"id": "001", "nombre": "Pan", "precio": 10.0, "stock": 5})
-    resultado = obtener_producto_por_descripcion("Queso")
-    out, a = capfd.readouterr()
-    assert resultado == []
-    assert "[]" in out  # se imprime la lista vacía
 
-def test_listar_productos_vacio(capfd):
-    listar_productos()
-    out, a = capfd.readouterr()
-    assert "No hay productos cargados" in out
+def test_obtener_producto_por_descripcion_encontrado():
+    lista = [prod("001", "Pan"), prod("002", "Leche")]
+    productos.leer = lambda clave: lista
+    productos.limpiar_consola = lambda: None
 
-def test_listar_productos_con_datos(capfd):
-    productos.append({"id": "001", "nombre": "Pan", "precio": 10.0, "stock": 5})
-    listar_productos()
-    out, a = capfd.readouterr()
-    assert "Pan" in out
-    assert "Precio" not in out 
+    encontrados = productos.obtener_producto_por_descripcion("pan")
+    assert len(encontrados) == 1
+    assert encontrados[0]["nombre"] == "Pan"
 
-def test_listar_producto_buscado_uno(capfd):
-    p = {"id": "A1", "nombre": "Pan", "precio": 10.0, "stock": 5}
-    listar_producto_buscado(p)
-    out, a = capfd.readouterr()
-    assert "Pan" in out
-    assert "Precio" not in out  
-def test_listar_producto_buscado_lista(capfd):
-    ps = [
-        {"id": "A1", "nombre": "Pan", "precio": 10.0, "stock": 5},
-        {"id": "A2", "nombre": "Leche", "precio": 15.0, "stock": 10},
-    ]
-    listar_producto_buscado(ps)
-    out, p = capfd.readouterr()
-    assert "Leche" in out and "Pan" in out
+
+def test_obtener_producto_por_descripcion_no_encontrado():
+    lista = [prod("001", "Pan")]
+    productos.leer = lambda clave: lista
+    productos.limpiar_consola = lambda: None
+
+    encontrados = productos.obtener_producto_por_descripcion("queso")
+    assert encontrados == []
