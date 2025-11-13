@@ -1,6 +1,7 @@
 from tabulate import tabulate
 import persistencia as p
 from datetime import datetime as d
+from utilidades import limpiar_consola
 
 
 def validacionFechas(desdeFecha,hastaFecha):
@@ -31,13 +32,14 @@ def calcularIngresos(desdeFecha, hastaFecha):
     Retorna:
         str: Tabla formateada con las ventas y una fila de totales.
     """
+    limpiar_consola()
 
     iva = 0.21
 
     try:
         # Intentar extraer la muestra de ventas
         desde, hasta = validacionFechas(desdeFecha, hastaFecha)
-        ventas = p.leer('ventasFakeParaTest')
+        ventas = p.leer('ventas')
         formato = "%Y-%m-%d"
         muestra = [v for v in ventas if desde <= d.strptime(v["fecha"],formato) <= hasta]
 
@@ -86,13 +88,14 @@ def calcularEgresos(desdeFecha, hastaFecha):
     Retorna:
         str: Tabla formateada con las compras y una fila de totales.
     """
+    limpiar_consola()
 
     iva = 0.21
 
     try:
         # Intentar extraer la muestra de ventas
         desde, hasta = validacionFechas(desdeFecha, hastaFecha)
-        compras = p.leer('comprasFakeParaTest')
+        compras = p.leer('compras')
         formato = "%Y-%m-%d"
         muestra = [c for c in compras if desde <= d.strptime(c["fecha"],formato) <= hasta]
 
@@ -144,6 +147,7 @@ def balance(desdeVenta, hastaVenta, desdeCompra, hastaCompra):
     Retorna:
         Tabla formateada con resumen financiero del período.
     '''
+    limpiar_consola()
 
     try:
 
@@ -152,13 +156,13 @@ def balance(desdeVenta, hastaVenta, desdeCompra, hastaCompra):
 
         # Validacion muestras ventas
         desdeV, hastaV = validacionFechas(desdeVenta, hastaVenta)
-        ventas = p.leer('ventasFakeParaTest')
+        ventas = p.leer('ventas')
         formato = "%Y-%m-%d"
         muestraVentas = [v for v in ventas if desdeV <= d.strptime(v["fecha"],formato) <= hastaV]
 
         #Validacion muestra compras
         desdeC, hastaC = validacionFechas(desdeCompra, hastaCompra)
-        compras = p.leer('comprasFakeParaTest')
+        compras = p.leer('compras')
         formato = "%Y-%m-%d"
         muestraCompras = [c for c in compras if desdeC <= d.strptime(c["fecha"],formato) <= hastaC]
 
@@ -203,6 +207,8 @@ def menuFinanzas():
     '''
     Menú principal del módulo FINANZAS.
     '''
+    limpiar_consola()
+    
     while True:
         print("\n=== MENU DE FINANZAS ===")
         print("1. Calcular ingresos")

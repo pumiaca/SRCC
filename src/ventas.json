@@ -1,1 +1,32 @@
-[{"tipo": "venta", "fecha": "2025-11-12", "producto_id": "123", "cantidad": 2, "precio_unitario": 234.0, "total": 468.0}]
+[
+    {"tipo": "venta", "fecha": "2025-06-13", "producto_id": "1", "cantidad": 12, "precio_unitario": 256.0, "total": 3072.0},
+    {"tipo": "venta", "fecha": "2025-06-19", "producto_id": "9820", "cantidad": 35, "precio_unitario": 4.0, "total": 140.0},
+    {"tipo": "venta", "fecha": "2025-06-27", "producto_id": "4567", "cantidad": 3, "precio_unitario": 245.0, "total": 735.0},
+
+    {"tipo": "venta", "fecha": "2025-07-04", "producto_id": "8909", "cantidad": 2, "precio_unitario": 2346.0, "total": 4692.0},
+    {"tipo": "venta", "fecha": "2025-07-10", "producto_id": "456", "cantidad": 8, "precio_unitario": 200.0, "total": 1600.0},
+    {"tipo": "venta", "fecha": "2025-07-16", "producto_id": "123", "cantidad": 5, "precio_unitario": 234.0, "total": 1170.0},
+    {"tipo": "venta", "fecha": "2025-07-25", "producto_id": "789", "cantidad": 6, "precio_unitario": 1000.0, "total": 6000.0},
+
+    {"tipo": "venta", "fecha": "2025-08-02", "producto_id": "0001", "cantidad": 12, "precio_unitario": 56.0, "total": 672.0},
+    {"tipo": "venta", "fecha": "2025-08-07", "producto_id": "45678", "cantidad": 4, "precio_unitario": 356.0, "total": 1424.0},
+    {"tipo": "venta", "fecha": "2025-08-12", "producto_id": "9820", "cantidad": 25, "precio_unitario": 4.0, "total": 100.0},
+    {"tipo": "venta", "fecha": "2025-08-21", "producto_id": "123", "cantidad": 8, "precio_unitario": 234.0, "total": 1872.0},
+    {"tipo": "venta", "fecha": "2025-08-29", "producto_id": "1", "cantidad": 10, "precio_unitario": 256.0, "total": 2560.0},
+
+    {"tipo": "venta", "fecha": "2025-09-05", "producto_id": "4678", "cantidad": 8, "precio_unitario": 34.0, "total": 272.0},
+    {"tipo": "venta", "fecha": "2025-09-13", "producto_id": "456", "cantidad": 12, "precio_unitario": 200.0, "total": 2400.0},
+    {"tipo": "venta", "fecha": "2025-09-22", "producto_id": "4567", "cantidad": 6, "precio_unitario": 245.0, "total": 1470.0},
+    {"tipo": "venta", "fecha": "2025-09-30", "producto_id": "789", "cantidad": 10, "precio_unitario": 1000.0, "total": 10000.0},
+
+    {"tipo": "venta", "fecha": "2025-10-06", "producto_id": "8909", "cantidad": 1, "precio_unitario": 2346.0, "total": 2346.0},
+    {"tipo": "venta", "fecha": "2025-10-14", "producto_id": "9820", "cantidad": 15, "precio_unitario": 4.0, "total": 60.0},
+    {"tipo": "venta", "fecha": "2025-10-20", "producto_id": "0001", "cantidad": 9, "precio_unitario": 56.0, "total": 504.0},
+    {"tipo": "venta", "fecha": "2025-10-27", "producto_id": "1", "cantidad": 16, "precio_unitario": 256.0, "total": 4096.0},
+
+    {"tipo": "venta", "fecha": "2025-11-02", "producto_id": "45678", "cantidad": 5, "precio_unitario": 356.0, "total": 1780.0},
+    {"tipo": "venta", "fecha": "2025-11-05", "producto_id": "123", "cantidad": 6, "precio_unitario": 234.0, "total": 1404.0},
+    {"tipo": "venta", "fecha": "2025-11-07", "producto_id": "456", "cantidad": 7, "precio_unitario": 200.0, "total": 1400.0},
+    {"tipo": "venta", "fecha": "2025-11-09", "producto_id": "4678", "cantidad": 12, "precio_unitario": 34.0, "total": 408.0},
+    {"tipo": "venta", "fecha": "2025-11-11", "producto_id": "8909", "cantidad": 3, "precio_unitario": 2346.0, "total": 7038.0}
+]

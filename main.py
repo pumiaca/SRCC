@@ -4,6 +4,8 @@ from compras import menu_compras, compras
 from ventas import menu_ventas, ventas
 from persistencia import leer, cargar, borrar, actualizar
 from utilidades import limpiar_consola
+from finanzas import menuFinanzas
+from analiticas import menuAnaliticas
 
 def menu():
     '''

@@ -1,9 +1,8 @@
-import re
 from datetime import datetime as d
 from tabulate import tabulate
 import persistencia as p
 from finanzas import validacionFechas
-
+from utilidades import limpiar_consola
 
 def proyectarIngresos(desdeFecha):
     """
@@ -15,21 +14,24 @@ def proyectarIngresos(desdeFecha):
     Return:
         dict: Datos de la proyección (promedio diario, días, proyección total).
     """
+    limpiar_consola()
 
     try:
-        # Validar formato de fecha
-        desde = validacionFechas(desdeFecha)
-        ventas = p.leer('ventasFakeParaTest')
-        formato = "%Y-%m-%d"
-        # Convertir a objeto d para usarlo despues y valida q sea coherente
-        fechaActual = d.now()
-        diasPeriodo = (fechaActual - desde).days
+        # Validar formato de fecha, toma la fecha actual, usa el formato para pasarla a string para validacion quien la devuelve validada
+        formato = "%Y-%m-%d"        
+        fechaActual = d.now().strftime(formato)
+
+        desde, hasta = validacionFechas(desdeFecha, fechaActual)
+        ventas = p.leer('ventas')
+
+        # Convertir a objeto date para usarlo despues y valida q sea coherente
+        diasPeriodo = (hasta - desde).days
 
         if diasPeriodo <= 0:
             raise ValueError("La fecha de inicio debe ser anterior a la actual.")
 
         # Leer las ventas.json
-        ventas = p.leer("ventasFakeParaTest")
+        ventas = p.leer("ventas")
         if not ventas:
             raise ValueError("No se encontraron registros en ventas.json.")
 
@@ -38,7 +40,7 @@ def proyectarIngresos(desdeFecha):
             v for v in ventas
             if "fecha" in v and
                 d.strptime(v["fecha"], formato) >= desde and
-                d.strptime(v["fecha"], formato) <= fechaActual
+                d.strptime(v["fecha"], formato) <= hasta
         ]
 
         if not ventasPeriodo:
@@ -54,9 +56,9 @@ def proyectarIngresos(desdeFecha):
 
         # Generar item del diccionario de resultados
         resultado = {
-            "id": len(p.leer("proyeccion_ingresos")) + 1,
-            "fechaGeneracion": fechaActual.strftime(formato),
-            "periodoHistorico": f"{desde} → {fechaActual.strftime(formato)}",
+            "id": len(p.leer("proyeccionIngresos")) + 1,
+            "fechaGeneracion": hasta.strftime(formato),
+            "periodoHistorico": f"{desde} → {hasta.strftime(formato)}",
             "diasAnalizados": diasPeriodo,
             "promedioDiario": round(promedioDiario, 2),
             "proyeccionFutura": proyeccionFutura
@@ -91,10 +93,12 @@ def mostrarTopVentas(desdeFecha, hastaFecha, top: int = 5):
     Retorna:
         None (imprime una tabla con los productos top en el período).
     """
+    limpiar_consola()
+
     try:
         # Validar formato de fecha
         desde, hasta = validacionFechas(desdeFecha, hastaFecha)
-        ventas = p.leer('ventasFakeParaTest')
+        ventas = p.leer('ventas')
         formato = "%Y-%m-%d"
 
         if not ventas:
@@ -158,15 +162,18 @@ def calcularROI(desdeFecha, hastaFecha):
     Retorna:
         float: ROI expresado en porcentaje (%).
     """
+
+    limpiar_consola()
+
     try:
         # Validacion muestras ventas
         desde, hasta = validacionFechas(desdeFecha, hastaFecha)
-        ventas = p.leer('ventasFakeParaTest')
+        ventas = p.leer('ventas')
         formato = "%Y-%m-%d"
 
         # Leer archivos de persistencia
-        ventas = p.leer("ventasFakeParaTest")
-        compras = p.leer("comprasFakeParaTest")
+        ventas = p.leer("ventas")
+        compras = p.leer("compras")
 
         if not ventas or not compras:
             raise FileNotFoundError("No se encontraron registros de ventas.")
@@ -220,6 +227,9 @@ def menuAnaliticas():
     '''
     Menú principal del módulo ANALÍTICAS.
     '''
+
+    limpiar_consola()
+
     while True:
         print("\n=== MENU DE ANALÍTICAS ===")
         print("1. Proyectar ingresos")
@@ -237,8 +247,7 @@ def menuAnaliticas():
         elif opcion == "2":
             desde = input("Ingrese la fecha DESDE (YYYY-MM-DD): ").strip()
             hasta = input("Ingrese la fecha HASTA (YYYY-MM-DD): ").strip()
-            top = input("¿Cuántos productos desea mostrar? (por defecto = 5): ").strip()
-            top = int(top) if top.isdigit() and int(top) > 0 else 5
+            top = int(input("¿Cuántos productos desea mostrar? (por defecto = 5): ").strip())
             mostrarTopVentas(desde, hasta, top)
 
         elif opcion == "3":
