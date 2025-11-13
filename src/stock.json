@@ -1,17 +1,1 @@
-[
-    {
-        "id": 1,
-        "nombre": "Producto A",
-        "cantidad": 50
-    },
-    {
-        "id": 2,
-        "nombre": "Producto B",
-        "cantidad": 30
-    },
-    {
-        "id": 3,
-        "nombre": "Producto C",
-        "cantidad": 20
-    }
-]
+[{"C\u00f3digo": "002", "Nombre": "Leche", "Stock": 2, "Alerta": "Bajo stock"}]
