@@ -2,7 +2,7 @@
 # Control de stock
 from tabulate import tabulate
 from productos import productos, obtener_producto_por_codigo
-from persistencia import actualizar, leer, cargar, borrar
+from persistencia import actualizar, leer, cargar, borrar, generar_reporte, limpiar_datos
 from utilidades import limpiar_consola
 
 OPERACIONES = ("venta", "compra")
@@ -12,6 +12,8 @@ def verificar_stock():
     Lista el stock de todos los productos y alerta si hay bajo stock.
     '''
     limpiar_consola()
+    limpiar_datos("stock")
+
     productos = []
     productos.extend(leer("productos"))
     if not productos:
@@ -24,7 +26,14 @@ def verificar_stock():
     for p in productos:
         alerta = "Bajo stock" if p["stock"] < 5 else "OK"
         tabla.append([p["id"], p["nombre"], p["stock"], alerta])
-
+        if alerta == "Bajo stock":
+            cargar("stock",{
+                "Código": p["id"],
+                "Nombre": p["nombre"],
+                "Stock": p["stock"],
+                "Alerta": alerta})
+    
+    generar_reporte("stock")
     print(tabulate(tabla, headers=headers, tablefmt="grid"))
 
 
