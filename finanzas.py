@@ -3,7 +3,7 @@ import persistencia as p
 from datetime import datetime as d
 from utilidades import limpiar_consola
 
-
+# Validacion de fechas (orden y formato)
 def validacionFechas(desdeFecha,hastaFecha):
 
     formato = "%Y-%m-%d"
@@ -132,7 +132,6 @@ def calcularEgresos(desdeFecha, hastaFecha):
     except Exception as e:
         return f"Ocurrió un error inesperado: {e}"
 
-    
 def balance(desdeVenta, hastaVenta, desdeCompra, hastaCompra):
 
     '''
@@ -208,7 +207,7 @@ def menuFinanzas():
     Menú principal del módulo FINANZAS.
     '''
     limpiar_consola()
-    
+
     while True:
         print("\n=== MENU DE FINANZAS ===")
         print("1. Calcular ingresos")
