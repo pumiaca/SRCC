@@ -1,7 +1,10 @@
 import json
+from pathlib import Path
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
+
+DATA_DIR = Path(__file__).parent /"src"
 
 def leer(archivo:str):
     """
@@ -12,12 +15,13 @@ def leer(archivo:str):
         Si el archivo existe, devuelve una lista de diccionarios con los datos del archivo.
         Si el archivo no existe, devuelve una lista vacía.
     """
-    datos = []
+    path = DATA_DIR / f"{archivo}.json"
     try:
-        with open(f"./src/{archivo}.json", "r", encoding="utf-8") as archivo:
-            datos = json.load(archivo)
-        return datos
+        with open(path, "r", encoding='utf-8') as contenido:
+            datos = json.load(contenido)
+            return(datos)
     except FileNotFoundError:
+        print("Error carga de archivos")
         return []
 
 def cargar(archivo:str, dato:dict):
@@ -30,12 +34,16 @@ def cargar(archivo:str, dato:dict):
         Si el archivo existe, devuelve una lista de diccionarios con los datos del archivo.
         Si el archivo no existe, devuelve el error.
     """
+    path = DATA_DIR / f"{archivo}.json"
+
     datos = leer(archivo)
     datos.append(dato)
+    
     try:
-        with open(f"./src/{archivo}.json", "w", encoding="utf-8") as archivo:
+        with open(path, "w", encoding="utf-8") as archivo:
             json.dump(datos, archivo)
         return datos
+    
     except Exception as e:
         return f"Error de Carga: {e}"
 
@@ -50,6 +58,7 @@ def actualizar(archivo:str, dato:dict):
         Si el archivo no existe, devuelve el error.
     
     """
+    path = DATA_DIR / f"{archivo}.json"
     datos = leer(archivo)
     nuevos_datos = []
     for item in datos:
@@ -57,9 +66,8 @@ def actualizar(archivo:str, dato:dict):
             nuevos_datos.append(item)
         else:
             nuevos_datos.append(dato)
-    
     try:
-        with open(f"./src/{archivo}.json", "w", encoding="utf-8") as archivo:
+        with open(path, "w", encoding="utf-8") as archivo:
             json.dump(nuevos_datos, archivo)
         return nuevos_datos
     except Exception as e:
@@ -75,10 +83,13 @@ def borrar(archivo:str, dato:dict):
         Si el archivo existe, devuelve una lista de diccionarios con los datos del archivo.
         Si el archivo no existe, devuelve el error.
     """
+
+
     datos = leer(archivo)
     datos = [item for item in datos if item["id"] != dato["id"]]
+    path = DATA_DIR / f"{archivo}.json"
     try:
-        with open(f"./src/{archivo}.json", "w", encoding="utf-8") as archivo:
+        with open(path, "w", encoding="utf-8") as archivo:
             json.dump(datos, archivo)
         return datos
     except Exception as e:
@@ -144,8 +155,10 @@ def limpiar_datos(archivo:str):
         Si el archivo se limpia correctamente, devuelve True.
         Si ocurre un error, devuelve el error.
     """
+
+    path = DATA_DIR / f"{archivo}.json"
     try:
-        with open(f"./src/{archivo}.json", "w", encoding="utf-8") as archivo:
+        with open(path, "w", encoding="utf-8") as archivo:
             json.dump([], archivo)
         return True
     except Exception as e:

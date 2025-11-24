@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../')
+
 import stock
 
 def producto_ejemplo(codigo="001", nombre="Pan", stock_cant=10):

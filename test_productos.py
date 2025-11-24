@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../')
 import productos
 
 def prod(id="001", nombre="Pan", precio=10.5, stock=8):
