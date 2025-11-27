@@ -28,29 +28,29 @@ def menu_productos():
         if opcion_p == "1":
             p = crear_producto()
             if agregar_producto(p):
-                encabezador("Producto agragado con exito!", ancho=5, caracter="-")
+                encabezador("Producto agragado con exito!", ancho=55, caracter="-")
         elif opcion_p == "2":
             codigo = input("Ingrese Código del Producto: ").strip()
             p = obtener_producto_por_codigo(codigo)
             if p == None:
-                encabezador("Producto no encontrado.", ancho=5, caracter="-")
+                encabezador("Producto no encontrado.", ancho=55, caracter="-")
             else:
                 listar_producto_buscado(p)
         elif opcion_p == "3":
             descripcion = input("Ingrese Nombre del Producto: ").strip()
             p = obtener_producto_por_descripcion(descripcion)
             if p == None:
-                encabezador("Producto no encontrado.", ancho=5, caracter="-")
+                encabezador("Producto no encontrado.", ancho=55, caracter="-")
             else:
                 listar_producto_buscado(p)
         elif opcion_p == "4":
             codigo = input("Ingrese Código del Producto a Borrar: ").strip()
             p = obtener_producto_por_codigo(codigo)
             if p is None:
-                encabezador("Producto no encontrado.", ancho=5, caracter="-")
+                encabezador("Producto no encontrado.", ancho=55, caracter="-")
             else:
                 borrar('productos', p)
-                encabezador("Producto Borrado.", ancho=5, caracter="-")
+                encabezador("Producto Borrado.", ancho=55, caracter="-")
         elif opcion_p == "5":
             listar_productos()
         elif opcion_p == "6":

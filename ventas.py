@@ -142,4 +142,4 @@ def menu_ventas():
             limpiar_consola()
             break
         else:
-            encabezador("Opción inválida. Intente nuevamente.", ancho = 50, caracter="*")
+            encabezador("Opción inválida. Intente nuevamente.", ancho = 55, caracter="*")
