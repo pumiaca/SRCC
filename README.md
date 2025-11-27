@@ -88,3 +88,20 @@ De esta forma, la información se mantiene disponible entre ejecuciones.
 Facultad de Ingeniería - FAIN  
 Departamento de Tecnología Informática
 
+## Correr Test
+En consola de Python, correr el comando
+```shell
+    python -m pytest
+```
+
+## Correr Covertura de Test
+En consola de Python, correr el comando
+```shell
+    python -m pytest --cov . 
+```
+
+
+También disponible la documentación en formato html
+```shell
+    python -m pytest --cov-report html --cov .
+```
