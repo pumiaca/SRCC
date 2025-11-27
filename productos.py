@@ -3,7 +3,7 @@
 import re
 from tabulate import tabulate
 from persistencia import cargar, leer, actualizar, borrar
-from utilidades import limpiar_consola
+from utilidades import limpiar_consola, encabezador
 
 productos = []
 
@@ -15,7 +15,7 @@ def menu_productos():
     limpiar_consola()
 
     while True:
-        print("\n=== MENU DE PRODUCTOS ===")
+        encabezador("MENU DE PRODUCTOS")
         print("1. Agregar producto")
         print("2. Buscar producto por codigo")
         print("3. Buscar producto por Descripción")
@@ -28,36 +28,36 @@ def menu_productos():
         if opcion_p == "1":
             p = crear_producto()
             if agregar_producto(p):
-                print("Producto agregado.")
+                encabezador("Producto agragado con exito!", ancho=5, caracter="-")
         elif opcion_p == "2":
             codigo = input("Ingrese Código del Producto: ").strip()
             p = obtener_producto_por_codigo(codigo)
             if p == None:
-                print("Producto no Encontrado.")
+                encabezador("Producto no encontrado.", ancho=5, caracter="-")
             else:
                 listar_producto_buscado(p)
         elif opcion_p == "3":
             descripcion = input("Ingrese Nombre del Producto: ").strip()
             p = obtener_producto_por_descripcion(descripcion)
             if p == None:
-                print("Producto no Encontrado.")
+                encabezador("Producto no encontrado.", ancho=5, caracter="-")
             else:
                 listar_producto_buscado(p)
         elif opcion_p == "4":
             codigo = input("Ingrese Código del Producto a Borrar: ").strip()
             p = obtener_producto_por_codigo(codigo)
             if p is None:
-                print("Producto no Encontrado.")
+                encabezador("Producto no encontrado.", ancho=5, caracter="-")
             else:
                 borrar('productos', p)
-                print("Producto Borrado.")
+                encabezador("Producto Borrado.", ancho=5, caracter="-")
         elif opcion_p == "5":
             listar_productos()
         elif opcion_p == "6":
             limpiar_consola()
             break
         else:
-            print("Opción inválida")
+            encabezador("Opción inválida")
 
 def crear_producto():
     '''
@@ -69,17 +69,17 @@ def crear_producto():
     while True:
         codigo = input("Código: ").strip()
         if not codigo:
-            print("El código no puede estar vacío.")
+            encabezador("El código no puede estar vacío.")
             continue
         if any(p["id"] == codigo for p in productos):
-            print("Ya existe un producto con ese código. Intente con otro.")
+            encabezador("Ya existe un producto con ese código. Intente con otro.")
             continue
         break
 
     while True:
         nombre = input("Nombre: ").strip()
         if not nombre:
-            print("El nombre no puede estar vacío.")
+            encabezador("El nombre no puede estar vacío.")
             continue
         break
 
@@ -87,21 +87,21 @@ def crear_producto():
         try:
             precio = float(input("Precio: ").strip())
             if precio <= 0:
-                print("El precio debe ser mayor a 0.")
+                encabezador("El precio debe ser mayor a 0.")
                 continue
             break
         except ValueError:
-            print("Ingrese un número válido para el precio.")
+            encabezador("Ingrese un número válido para el precio.")
 
     while True:
         try:
             stock = int(input("Stock: ").strip())
             if stock < 0:
-                print("El stock no puede ser negativo.")
+                encabezador("El stock no puede ser negativo.")
                 continue
             break
         except ValueError:
-            print("Ingrese un número entero válido para el stock.")
+            encabezador("Ingrese un número entero válido para el stock.")
 
     datos = {
         "id": codigo,
@@ -122,7 +122,7 @@ def listar_productos():
     productos.extend(leer("productos"))
 
     if not productos:
-        print("No hay productos cargados.")
+        encabezador("No hay productos cargados.")
         return
 
     headers = list(productos[0].keys())
@@ -142,7 +142,7 @@ def listar_producto_buscado(Producto):
     productos.extend(leer("productos"))
 
     if not Producto:
-        print("No hay productos cargados.")
+        encabezador("No hay productos cargados.")
         return
 
     if isinstance(Producto, dict):
@@ -167,7 +167,7 @@ def agregar_producto(p):
     productos.extend(leer("productos"))
 
     if any(x["id"] == p["id"] for x in productos):
-        print("Ya existe un producto con ese código.")
+        encabezador("Ya existe un producto con ese código.")
         return False
     productos.append(p)
     cargar('productos', p)

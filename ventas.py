@@ -4,7 +4,7 @@ from stock import actualizar_stock
 from persistencia import leer, actualizar, cargar
 from utilidades import limpiar_consola
 from tabulate import tabulate
-from utilidades import limpiar_consola
+from utilidades import limpiar_consola, encabezador
 
 ventas = []
 
@@ -128,7 +128,7 @@ def menu_ventas():
     limpiar_consola()
 
     while True:
-        print("\n=== VENTAS ===")
+        ("\n=== VENTAS ===")
         print("1. Registrar venta")
         print("2. Listar ventas")
         print("3. Volver")
@@ -142,4 +142,4 @@ def menu_ventas():
             limpiar_consola()
             break
         else:
-            print("Opción inválida.")
+            encabezador("Opción inválida. Intente nuevamente.", ancho = 50, caracter="*")

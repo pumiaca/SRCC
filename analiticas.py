@@ -2,7 +2,7 @@ from datetime import datetime as d
 from tabulate import tabulate
 import persistencia as p
 from finanzas import validacionFechas
-from utilidades import limpiar_consola
+from utilidades import limpiar_consola,encabezador
 
 def proyectarIngresos(desdeFecha):
     """
@@ -28,12 +28,12 @@ def proyectarIngresos(desdeFecha):
         diasPeriodo = (hasta - desde).days
 
         if diasPeriodo <= 0:
-            raise ValueError("La fecha de inicio debe ser anterior a la actual.")
+            raise ValueError(encabezador("La fecha de inicio debe ser anterior a la actual."))
 
         # Leer las ventas.json
         ventas = p.leer("ventas")
         if not ventas:
-            raise ValueError("No se encontraron registros en ventas.json.")
+            raise ValueError(encabezador("No se encontraron registros en ventas.json."))
 
         # Filtrar ventas dentro del rango [fechaInicio, fechaActual]
         ventasPeriodo = [
@@ -44,7 +44,7 @@ def proyectarIngresos(desdeFecha):
         ]
 
         if not ventasPeriodo:
-            raise ValueError("No se encontraron ventas en el periodo seleccionado.")
+            raise ValueError(encabezador("No se encontraron ventas en el periodo seleccionado."))
 
         # Calcular promedio diario
         totales = [v["total"] for v in ventasPeriodo]
@@ -102,7 +102,7 @@ def mostrarTopVentas(desdeFecha, hastaFecha, top: int = 5):
         formato = "%Y-%m-%d"
 
         if not ventas:
-            raise FileNotFoundError("No se encontraron registros de ventas.")
+            raise FileNotFoundError(encabezador("No se encontraron registros de ventas.", ancho = 30, caracter = "-"))
 
         # Filtrar ventas entre fechas (incluyendolas)
         ventasFiltradas = [
@@ -111,7 +111,7 @@ def mostrarTopVentas(desdeFecha, hastaFecha, top: int = 5):
         ]
 
         if not ventasFiltradas:
-            print("No hay ventas registradas en el período seleccionado.")
+            print(encabezador("No se encontraron registros de ventas en el periodo seleccionado", ancho = 30, caracter = "-"))
             return
 
         # Agrupar por producto
@@ -140,15 +140,15 @@ def mostrarTopVentas(desdeFecha, hastaFecha, top: int = 5):
 
         headers = ["Producto ID", "Cantidad Vendida", "Total Ingresos"]
 
-        print("TOP VENTAS")
+        encabezador("TOP VENTAS")
         print(tabulate(tabla, headers=headers, tablefmt="grid"))
 
     except FileNotFoundError as e:
-        print(f"Error de archivo: {e}")
+        print(encabezador(f"Error de archivo: {e}",ancho=30, caracter='*'))
     except ValueError as e:
-        print(f"Error de validación: {e}")
+        print(encabezador(f"Error de validacion: {e}",ancho=30, caracter='*'))
     except Exception as e:
-        print(f"Error inesperado: {e}")
+        print(encabezador(f"Error inesperado: {e}",ancho=30, caracter='*'))
 
 def calcularROI(desdeFecha, hastaFecha):
     """
@@ -176,7 +176,7 @@ def calcularROI(desdeFecha, hastaFecha):
         compras = p.leer("compras")
 
         if not ventas or not compras:
-            raise FileNotFoundError("No se encontraron registros de ventas.")
+            raise FileNotFoundError(encabezador("No se encontraron registros de ventas.", ancho = 30, caracter = "-"))
 
         # Recorrer los items de los json por fecha
         ventasPeriodo = [
@@ -191,7 +191,7 @@ def calcularROI(desdeFecha, hastaFecha):
         ]
 
         if not ventasPeriodo or not comprasPeriodo:
-            print("No hay suficientes registros en el período seleccionado.")
+            print(encabezador("No se encontraron registros de ventas en el perioso seleccionado", ancho = 30, caracter = "-"))
             return None
 
         # Calcular ingresos y egresos totales y el famoso dividir por cero
@@ -206,7 +206,7 @@ def calcularROI(desdeFecha, hastaFecha):
         roi = calcularROI(totalIngresos, totalEgresos)
 
         # Mostrar resultados
-        print(f"ANÁLISIS DE RENTABILIDAD (ROI)")
+        encabezador("ANALISIS DE RENTABILIDAD (ROI)")
         print(f"Período: {desde} → {hasta}")
         print(f"Ingresos Totales: ${totalIngresos:,.2f}")
         print(f"Egresos Totales:  ${totalEgresos:,.2f}")
@@ -215,13 +215,13 @@ def calcularROI(desdeFecha, hastaFecha):
         return roi
 
     except FileNotFoundError as e:
-        print(f"Error de archivo: {e}")
+        print(encabezador(f"Error de archivo: {e}",ancho=30, caracter='*'))
     except ValueError as e:
-        print(f"Error de validación: {e}")
+        print(encabezador(f"Error de validacion: {e}",ancho=30, caracter='*'))
     except ZeroDivisionError as e:
-        print(f"Error matemático: {e}")
+        print(encabezador(f"Error matematico: {e}",ancho=30, caracter='*'))
     except Exception as e:
-        print(f"Error inesperado: {e}")
+        print(encabezador(f"Error inesperado: {e}",ancho=30, caracter='*'))
 
 def menuAnaliticas():
     '''
@@ -231,7 +231,7 @@ def menuAnaliticas():
     limpiar_consola()
 
     while True:
-        print("\n=== MENU DE ANALÍTICAS ===")
+        encabezador("MENU DE ANALITICAS")
         print("1. Proyectar ingresos")
         print("2. Mostrar top ventas")
         print("3. Calcular ROI")
@@ -247,8 +247,7 @@ def menuAnaliticas():
         elif opcion == "2":
             desde = input("Ingrese la fecha DESDE (YYYY-MM-DD): ").strip()
             hasta = input("Ingrese la fecha HASTA (YYYY-MM-DD): ").strip()
-            top = int(input("¿Cuántos productos desea mostrar? (por defecto = 5): ").strip())
-            mostrarTopVentas(desde, hasta, top)
+            mostrarTopVentas(desde, hasta)
 
         elif opcion == "3":
             desde = input("Ingrese la fecha DESDE (YYYY-MM-DD): ").strip()
@@ -262,4 +261,4 @@ def menuAnaliticas():
             break
 
         else:
-            print("Opción inválida. Intente nuevamente.")
+            encabezador("Opción inválida. Intente nuevamente.", ancho = 50, caracter="*")

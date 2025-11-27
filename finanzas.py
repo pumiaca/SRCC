@@ -1,7 +1,7 @@
 from tabulate import tabulate
 import persistencia as p
 from datetime import datetime as d
-from utilidades import limpiar_consola
+from utilidades import limpiar_consola, encabezador
 
 # Validacion de fechas (orden y formato)
 def validacionFechas(desdeFecha,hastaFecha):
@@ -44,7 +44,7 @@ def calcularIngresos(desdeFecha, hastaFecha):
         muestra = [v for v in ventas if desde <= d.strptime(v["fecha"],formato) <= hasta]
 
         if not muestra:
-            raise ValueError("No se encuentran registros en el periodo seleccionado.")
+            raise ValueError(encabezador("No se encuentran registros en el periodo seleccionado."))
 
         # Lambda para calcular IVA
         calcularIVA = lambda total: total * iva
@@ -166,7 +166,7 @@ def balance(desdeVenta, hastaVenta, desdeCompra, hastaCompra):
         muestraCompras = [c for c in compras if desdeC <= d.strptime(c["fecha"],formato) <= hastaC]
 
         if not muestraVentas and not muestraCompras:
-            return "No se encuentran registros en el periodo seleccionado."
+            return encabezador("No se encuentran registros en el periodo seleccionado.")
 
         # Totales de ingresos
         totalIngresos = sum([v['total'] for v in muestraVentas])
@@ -203,13 +203,11 @@ def balance(desdeVenta, hastaVenta, desdeCompra, hastaCompra):
         return f"Ocurrió un error inesperado: {e}"
     
 def menuFinanzas():
-    '''
-    Menú principal del módulo FINANZAS.
-    '''
+    
     limpiar_consola()
 
     while True:
-        print("\n=== MENU DE FINANZAS ===")
+        encabezador("MENU FINANZAS")
         print("1. Calcular ingresos")
         print("2. Calcular egresos")
         print("3. Calcular balance")
@@ -230,7 +228,7 @@ def menuFinanzas():
             print("\n" + str(resultado))
 
         elif opcion == "3":
-            print("\n=== BALANCE GENERAL ===")
+            encabezador("BALANCE GENERAL")
             print("Rango de VENTAS:")
             desdeV = input("Ingrese fecha DESDE (YYYY-MM-DD): ").strip()
             hastaV = input("Ingrese fecha HASTA (YYYY-MM-DD): ").strip()
@@ -245,4 +243,4 @@ def menuFinanzas():
             break
 
         else:
-            print("Opción inválida. Intente nuevamente.")
+            encabezador("Opción inválida. Intente nuevamente.", ancho = 50, caracter="*")

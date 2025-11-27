@@ -3,7 +3,7 @@ from stock import menu_stock, verificar_stock, actualizar_stock
 from compras import menu_compras, compras
 from ventas import menu_ventas, ventas
 from persistencia import leer, cargar, borrar, actualizar
-from utilidades import limpiar_consola
+from utilidades import limpiar_consola,encabezador
 from finanzas import menuFinanzas
 from analiticas import menuAnaliticas
 
@@ -15,7 +15,7 @@ def menu():
     limpiar_consola()
     
     while True:
-        print("\n=== SISTEMA DE CONTROL COMERCIAL ===")
+        encabezador("SISTEMA DE CONTROL COMERCIAL")
         print("1. Productos")
         print("2. Gestión de stock")
         print("3. Compras")
@@ -42,7 +42,7 @@ def menu():
             print("Saliendo del sistema...")
             break
         else:
-            print("Opción inválida. Intente nuevamente.")
+            encabezador("Opción inválida. Intente nuevamente.", ancho = 50, caracter="*")
 
 
 if __name__ == "__main__":

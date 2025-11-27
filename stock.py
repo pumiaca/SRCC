@@ -3,7 +3,7 @@
 from tabulate import tabulate
 from productos import productos, obtener_producto_por_codigo
 from persistencia import actualizar, leer, cargar, borrar, generar_reporte, limpiar_datos
-from utilidades import limpiar_consola
+from utilidades import limpiar_consola,encabezador
 
 OPERACIONES = ("venta", "compra")
 
@@ -17,7 +17,7 @@ def verificar_stock():
     productos = []
     productos.extend(leer("productos"))
     if not productos:
-        print("No hay productos cargados.")
+        encabezador("No hay productos cargados.")
         return
 
     headers = ["Código", "Nombre", "Stock", "Alerta"]
@@ -42,32 +42,32 @@ def actualizar_stock(codigo, cantidad, operacion):
     Actualiza el stock de un producto según la operación ("venta" o "compra").
     '''
     if operacion not in OPERACIONES:
-        print(f"Operación inválida. Solo se permiten: {OPERACIONES}")
+        encabezador(f"Operación inválida. Solo se permiten: {OPERACIONES}")
         return
 
     producto = obtener_producto_por_codigo(codigo)
     if not producto:
-        print(f"Producto con código {codigo} no encontrado.")
+        encabezador(f"Producto con código {codigo} no encontrado.")
         return
 
     if cantidad <= 0:
-        print("La cantidad debe ser un número entero positivo.")
+        encabezador("La cantidad debe ser un número entero positivo.")
         return
 
     if operacion == "venta":
         if producto["stock"] >= cantidad:
             producto["stock"] -= cantidad
             actualizar("productos", producto)
-            print(f"Venta realizada. Nuevo stock de {producto['nombre']}: {producto['stock']}")
+            encabezador(f"Venta realizada. Nuevo stock de {producto['nombre']}: {producto['stock']}")
         else:
-            print(f"Stock insuficiente para vender {cantidad} unidades.")
+            encabezador(f"Stock insuficiente para vender {cantidad} unidades.")
     elif operacion == "compra":
         producto["stock"] += cantidad
         actualizar("productos", producto)
-        print(f"Compra registrada. Nuevo stock de {producto['nombre']}: {producto['stock']}")
+        encabezador(f"Compra registrada. Nuevo stock de {producto['nombre']}: {producto['stock']}", caracter= "+")
 
     if producto["stock"] < 5:
-        print(f"Alerta: El producto '{producto['nombre']}' tiene bajo stock ({producto['stock']} unidades).")
+        encabezador(f"Alerta: El producto '{producto['nombre']}' tiene bajo stock ({producto['stock']} unidades).", caracter="+")
 
 
 def menu_stock():
@@ -76,7 +76,7 @@ def menu_stock():
     '''
     limpiar_consola()
     while True:
-        print("\n=== MENU DE GESTION DE STOCK ===")
+        encabezador("MENU DE GESTION DE STOCK")
         print("1. Verificar stock")
         print("2. Actualizar stock")
         print("3. Regresar al menú principal")
@@ -89,18 +89,18 @@ def menu_stock():
         elif opcion == "2":
             codigo = input("Ingrese código del producto: ").strip()
             if not codigo:
-                print("El código no puede estar vacío.")
+                encabezador("El código no puede estar vacío.")
                 continue
                 
             cantidad_input = input("Ingrese cantidad: ").strip()
             if not cantidad_input.isdigit() or int(cantidad_input) <= 0:
-                print("La cantidad debe ser un número entero positivo.")
+                encabezador("La cantidad debe ser un número entero positivo.")
                 continue
             cantidad = int(cantidad_input)
 
             operacion = input("Ingrese operación (venta/compra): ").strip().lower()
             if operacion not in OPERACIONES:
-                print(f"Operación inválida. Solo se permiten: {OPERACIONES}")
+                encabezador(f"Operación inválida. Solo se permiten: {OPERACIONES}")
                 continue
 
             actualizar_stock(codigo, cantidad, operacion)
@@ -109,4 +109,4 @@ def menu_stock():
             limpiar_consola()
             break
         else:
-            print("Opción inválida. Intente de nuevo.")
+            encabezador("Opción inválida. Intente nuevamente.", ancho = 50, caracter="*")
